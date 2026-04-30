@@ -1,17 +1,39 @@
 package model;
 
-import java.util.*;
+import java.util.List;
 
-// Docente estende Utente
 class Docente extends Utente {
     private String ruolo;
-    public List<Vincolo> vincoli = new ArrayList<>();
+    private List<Vincolo> vincoli;
+    private List<Lezione> lezioni;
 
-    public void visualizzaOrario() {
-        System.out.println("Orario docente");
+    Docente(String nome, String cognome, String email, String password, String ruolo) {
+        super(nome, cognome, email, password);
+        this.ruolo = ruolo;
     }
 
-    public void richiestaSpostamentoLezione() {
-        System.out.println("Richiesta spostamento");
+    public void visualizzaOrario() {}
+    public void richiestaSpostamentoLezione(SpostamentoLezione s) {}
+
+    public String getRuolo() {
+        return ruolo;
+    }
+
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
+    }
+
+    public List<Vincolo> getVincoli() {
+        return vincoli;
+    }
+    public void setVincoli(List<Vincolo> vincoli) {
+        this.vincoli = vincoli;
+    }
+
+    public List<Lezione> getLezioni() {
+        return lezioni;
+    }
+    public void setLezioni(List<Lezione> lezioni) {
+        this.lezioni = lezioni;
     }
 }

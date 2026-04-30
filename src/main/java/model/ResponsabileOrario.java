@@ -1,17 +1,20 @@
 package model;
 
-// ResponsabileOrario estende Docente
 class ResponsabileOrario extends Docente {
 
-    public void creazioneLezione() {
-        System.out.println("Creazione lezione");
+     ResponsabileOrario(String nome, String cognome, String email, String password, String ruolo) {
+        super(nome, cognome, email, password, ruolo);
     }
 
-    public void inserisciAulaDisponibile() {
-        System.out.println("Inserisci aula");
+    public void creazioneLezione(Lezione l) {
+        // creazione lezione
+    }
+
+    public void inserisciAulaDisponibile(Aula a) {
+        // inserimento aula
     }
 
     public void visualizzaEventualiConflitti() {
-        System.out.println("Controllo conflitti");
+        // controllo conflitti
     }
 }

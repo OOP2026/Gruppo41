@@ -1,15 +1,66 @@
 package model;
 
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
-// SpostamentoLezione
 class SpostamentoLezione {
-    private Date dataRichiesta;
+    private LocalDate dataRichiesta;
     private String stato;
-    private Date nuovaData;
-    private String nuovaOraInizio;
-    private String nuovaOraFine;
+    private LocalDate nuovaData;
+    private LocalTime nuovoOrarioInizio;
+    private LocalTime nuovoOrarioFine;
+    private Lezione lezione;
 
-    public Lezione lezione;
-    public Docente docente;
+    SpostamentoLezione(LocalDate dataRichiesta, String stato) {
+        this.dataRichiesta = dataRichiesta;
+        this.stato = stato;
+    }
+
+    public LocalDate getDataRichiesta() {
+        return dataRichiesta;
+    }
+
+    public void setDataRichiesta(LocalDate dataRichiesta) {
+        this.dataRichiesta = dataRichiesta;
+    }
+
+    public String getStato() {
+        return stato;
+    }
+
+    public void setStato(String stato) {
+        this.stato = stato;
+    }
+
+    public LocalDate getNuovaData() {
+        return nuovaData;
+    }
+
+    public void setNuovaData(LocalDate nuovaData) {
+        this.nuovaData = nuovaData;
+    }
+
+    public LocalTime getNuovoOrarioInizio() {
+        return nuovoOrarioInizio;
+    }
+
+    public void setNuovoOrarioInizio(LocalTime nuovoOrarioInizio) {
+        this.nuovoOrarioInizio = nuovoOrarioInizio;
+    }
+
+    public LocalTime getNuovoOrarioFine() {
+        return nuovoOrarioFine;
+    }
+
+    public void setNuovoOrarioFine(LocalTime nuovoOrarioFine) {
+        this.nuovoOrarioFine = nuovoOrarioFine;
+    }
+
+    public Lezione getLezione() {
+        return lezione;
+    }
+
+    public void setLezione(Lezione lezione) {
+        this.lezione = lezione;
+    }
 }
