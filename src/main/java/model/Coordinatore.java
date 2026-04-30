@@ -14,9 +14,7 @@ Coordinatore(String nome, String cognome, String email, String password, String 
         s.setStato("RIFIUTATA");
     }
 
-    public void modificaOrario(Lezione l, String giorno,
-                               java.time.LocalTime inizio,
-                               java.time.LocalTime fine) {
+    public void modificaOrario(Lezione l, String giorno, java.time.LocalTime inizio, java.time.LocalTime fine) {
 
         l.setGiornoSettimana(giorno);
         l.setOraInizio(inizio);

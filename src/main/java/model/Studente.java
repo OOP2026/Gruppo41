@@ -18,10 +18,12 @@ class Studente extends Utente {
         return matricola;
     }
     public void setMatricola(String matricola) {
+
         this.matricola = matricola;
     }
 
     public List<Insegnamento> getInsegnamenti() {
+
         return insegnamenti;
     }
     public void setInsegnamenti(List<Insegnamento> insegnamenti) {
