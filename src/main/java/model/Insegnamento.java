@@ -2,19 +2,19 @@ package model;
 
 import java.util.List;
 
-class Insegnamento {
+    public class Insegnamento {
     private String nome;
     private int cfu;
     private int annoCorso;
     private List<Lezione> lezioni;
 
-    Insegnamento(String nome, int cfu, int annoCorso) {
+    public Insegnamento(String nome, int cfu, int annoCorso) {
         this.nome = nome;
         this.cfu = cfu;
         this.annoCorso = annoCorso;
     }
 
-    // Getter e Setter
+
     public String getNome() {
         return nome;
     }

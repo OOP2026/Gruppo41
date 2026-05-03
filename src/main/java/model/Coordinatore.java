@@ -1,8 +1,10 @@
 package model;
 
-class Coordinatore extends Docente {
+import java.time.LocalTime;
 
-Coordinatore(String nome, String cognome, String email, String password, String ruolo) {
+    public class Coordinatore extends Docente {
+
+    public Coordinatore(String nome, String cognome, String email, String password, String ruolo) {
         super(nome, cognome, email, password, ruolo);
     }
 
@@ -14,7 +16,7 @@ Coordinatore(String nome, String cognome, String email, String password, String 
         s.setStato("RIFIUTATA");
     }
 
-    public void modificaOrario(Lezione l, String giorno, java.time.LocalTime inizio, java.time.LocalTime fine) {
+    public void modificaOrario(Lezione l, String giorno, LocalTime inizio, LocalTime fine) {
 
         l.setGiornoSettimana(giorno);
         l.setOraInizio(inizio);

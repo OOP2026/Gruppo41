@@ -1,14 +1,16 @@
 package model;
 
 // Aula
+import java.util.ArrayList;
 import java.util.List;
 
-class Aula {
+    public class Aula {
     private String nome;
     private List<Lezione> lezioni;
 
-    Aula(String nome) {
+    public Aula(String nome) {
         this.nome = nome;
+        this.lezioni = new ArrayList<>();
     }
 
     public String getNome() {

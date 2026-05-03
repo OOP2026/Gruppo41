@@ -3,7 +3,7 @@ package model;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-class SpostamentoLezione {
+    public class SpostamentoLezione {
     private LocalDate dataRichiesta;
     private String stato;
     private LocalDate nuovaData;
@@ -11,7 +11,7 @@ class SpostamentoLezione {
     private LocalTime nuovoOrarioFine;
     private Lezione lezione;
 
-    SpostamentoLezione(LocalDate dataRichiesta, String stato) {
+    public SpostamentoLezione(LocalDate dataRichiesta, String stato) {
         this.dataRichiesta = dataRichiesta;
         this.stato = stato;
     }
@@ -26,52 +26,42 @@ class SpostamentoLezione {
     }
 
     public String getStato() {
-
         return stato;
     }
 
     public void setStato(String stato) {
-
         this.stato = stato;
     }
 
     public LocalDate getNuovaData() {
-
         return nuovaData;
     }
 
     public void setNuovaData(LocalDate nuovaData) {
-
         this.nuovaData = nuovaData;
     }
 
     public LocalTime getNuovoOrarioInizio() {
-
         return nuovoOrarioInizio;
     }
 
     public void setNuovoOrarioInizio(LocalTime nuovoOrarioInizio) {
-
         this.nuovoOrarioInizio = nuovoOrarioInizio;
     }
 
     public LocalTime getNuovoOrarioFine() {
-
         return nuovoOrarioFine;
     }
 
     public void setNuovoOrarioFine(LocalTime nuovoOrarioFine) {
-
         this.nuovoOrarioFine = nuovoOrarioFine;
     }
 
     public Lezione getLezione() {
-
         return lezione;
     }
 
     public void setLezione(Lezione lezione) {
-
         this.lezione = lezione;
     }
 }

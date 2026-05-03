@@ -2,12 +2,12 @@ package model;
 
 import java.time.LocalTime;
 
-class Vincolo {
+    public class Vincolo {
     private String giornoSettimana;
     private LocalTime oraInizio;
     private LocalTime oraFine;
 
-    Vincolo(String giornoSettimana, LocalTime oraInizio, LocalTime oraFine) {
+    public Vincolo(String giornoSettimana, LocalTime oraInizio, LocalTime oraFine) {
         this.giornoSettimana = giornoSettimana;
         this.oraInizio = oraInizio;
         this.oraFine = oraFine;

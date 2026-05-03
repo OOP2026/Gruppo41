@@ -2,7 +2,7 @@ package model;
 
 import java.time.LocalTime;
 
-class Lezione {
+    public class Lezione {
     private String giornoSettimana;
     private LocalTime oraInizio;
     private LocalTime oraFine;
@@ -10,7 +10,7 @@ class Lezione {
     private Aula aula;
     private Insegnamento insegnamento;
 
-    Lezione(String giornoSettimana, LocalTime oraInizio, LocalTime oraFine) {
+    public Lezione(String giornoSettimana, LocalTime oraInizio, LocalTime oraFine) {
         this.giornoSettimana = giornoSettimana;
         this.oraInizio = oraInizio;
         this.oraFine = oraFine;

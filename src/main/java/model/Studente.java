@@ -2,17 +2,21 @@ package model;
 
 import java.util.List;
 
-class Studente extends Utente {
+    public class Studente extends Utente {
     private String matricola;
     private List<Insegnamento> insegnamenti;
 
-    Studente(String nome, String cognome, String email, String password, String matricola) {
+    public Studente(String nome, String cognome, String email, String password, String matricola) {
         super(nome, cognome, email, password);
         this.matricola = matricola;
     }
 
-    public void visualizzaOrarioAnnoDiCorso() {}
-    public void visualizzaAula() {}
+    public void visualizzaOrarioAnnoDiCorso() {
+        //metodo da implementare
+    }
+    public void visualizzaAula() {
+        //metodo da implementare
+    }
 
     public String getMatricola() {
         return matricola;

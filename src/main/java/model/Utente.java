@@ -1,13 +1,13 @@
 package model;
 
 import java.util.*;
-class Utente {
+    public class Utente {
     private String nome;
     private String cognome;
     private String email;
     private String password;
 
-     Utente(String nome, String cognome, String email, String password) {
+     public Utente(String nome, String cognome, String email, String password) {
         this.nome = nome;
         this.cognome = cognome;
         this.email = email;

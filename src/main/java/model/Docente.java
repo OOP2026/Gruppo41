@@ -2,17 +2,19 @@ package model;
 
 import java.util.List;
 
-class Docente extends Utente {
+    public class Docente extends Utente {
     private String ruolo;
     private List<Vincolo> vincoli;
     private List<Lezione> lezioni;
 
-    Docente(String nome, String cognome, String email, String password, String ruolo) {
+    public Docente(String nome, String cognome, String email, String password, String ruolo) {
         super(nome, cognome, email, password);
         this.ruolo = ruolo;
     }
 
-    public void visualizzaOrario() {}
+    public void visualizzaOrario() {
+       //orario
+    }
     public void richiestaSpostamentoLezione(SpostamentoLezione s) {}
 
     public String getRuolo() {
