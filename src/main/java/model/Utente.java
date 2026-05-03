@@ -2,10 +2,10 @@ package model;
 
 import java.util.*;
     public class Utente {
-    private String nome;
-    private String cognome;
-    private String email;
-    private String password;
+    protected String nome;
+    protected String cognome;
+    protected String email;
+    protected String password;
 
      public Utente(String nome, String cognome, String email, String password) {
         this.nome = nome;
@@ -14,7 +14,9 @@ import java.util.*;
         this.password = password;
     }
 
-    public void login() {}
+    public void login() {
+         //login
+    }
 
     public String getNome() {
          return nome;
