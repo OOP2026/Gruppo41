@@ -11,7 +11,7 @@ public class LoginFrame extends JFrame {
     private JPasswordField passwordField;
     private JButton loginButton;
 
-    private controller controller;
+    private Controller controller;
 
     public LoginFrame(controller controller) {
         this.controller = controller;
