@@ -1,12 +1,12 @@
 package gui;
 
 import controller.Controller;
-import model.Utente;
+import model.*;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginPanel extends JPanel {
+    class LoginPanel extends JPanel {
 
     private JTextField emailField;
     private JPasswordField passwordField;

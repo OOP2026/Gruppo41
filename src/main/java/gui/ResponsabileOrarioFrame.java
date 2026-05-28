@@ -5,7 +5,7 @@ import model.ResponsabileOrario;
 import javax.swing.*;
 import java.awt.*;
 
-public class ResponsabileOrarioPanel extends JPanel {
+    class ResponsabileOrarioPanel extends JPanel {
     public ResponsabileOrarioPanel(ResponsabileOrario responsabile, Controller controller) {
         setLayout(new BorderLayout());
 

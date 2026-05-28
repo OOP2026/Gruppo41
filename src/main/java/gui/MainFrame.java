@@ -6,7 +6,7 @@ import model.*;
 import javax.swing.*;
 import java.awt.*;
 
-public class MainFrame extends JFrame {
+    public class MainFrame extends JFrame {
 
     private CardLayout cardLayout;
     private JPanel mainPanel;

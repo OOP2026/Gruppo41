@@ -5,7 +5,7 @@ import model.Studente;
 import javax.swing.*;
 import java.awt.*;
 
-public class StudentePanel extends JPanel {
+    class StudentePanel extends JPanel {
     public StudentePanel(Studente studente, Controller controller) {
         setLayout(new BorderLayout());
 
