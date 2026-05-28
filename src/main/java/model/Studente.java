@@ -1,6 +1,8 @@
 package model;
 
+import java.time.LocalTime;
 import java.util.List;
+import java.util.ArrayList;
 
     public class Studente extends Utente {
     private String matricola;

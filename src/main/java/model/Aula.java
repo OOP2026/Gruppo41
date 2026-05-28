@@ -1,8 +1,8 @@
 package model;
 
-// Aula
-import java.util.ArrayList;
+import java.time.LocalTime;
 import java.util.List;
+import java.util.ArrayList;
 
     public class Aula {
     private String nome;

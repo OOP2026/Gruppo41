@@ -1,41 +1,45 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
-    public class Docente extends Utente {
+public class Docente extends Utente {
     private String ruolo;
-    private List<Vincolo> vincoli;
     private List<Lezione> lezioni;
+    private List<Vincolo> vincoli;
 
     public Docente(String nome, String cognome, String email, String password, String ruolo) {
         super(nome, cognome, email, password);
         this.ruolo = ruolo;
+        this.lezioni = new ArrayList<>();
+        this.vincoli = new ArrayList<>();
     }
-
-    public void visualizzaOrario() {
-       //orario
-    }
-    public void richiestaSpostamentoLezione(SpostamentoLezione s) {}
 
     public String getRuolo() {
         return ruolo;
     }
 
-    public void setRuolo(String ruolo) {
-        this.ruolo = ruolo;
+    public List<Lezione> getLezioni() {
+        return lezioni;
+    }
+
+    public void visualizzaOrario() {
+        System.out.println("Visualizzazione orario docente...");
+    }
+
+    public void setLezioni(List<Lezione> lezioni) {
+        this.lezioni = lezioni;
     }
 
     public List<Vincolo> getVincoli() {
         return vincoli;
     }
+
     public void setVincoli(List<Vincolo> vincoli) {
         this.vincoli = vincoli;
     }
 
-    public List<Lezione> getLezioni() {
-        return lezioni;
-    }
-    public void setLezioni(List<Lezione> lezioni) {
-        this.lezioni = lezioni;
+    public void richiestaSpostamentoLezione(SpostamentoLezione spostamento) {
+        // Metodo stub per i test
     }
 }

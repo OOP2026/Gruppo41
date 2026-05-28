@@ -1,20 +1,20 @@
 package model;
 
-    public class ResponsabileOrario extends Docente {
+public class ResponsabileOrario extends Docente {
 
-     public ResponsabileOrario(String nome, String cognome, String email, String password, String ruolo) {
+    public ResponsabileOrario(String nome, String cognome, String email, String password, String ruolo) {
         super(nome, cognome, email, password, ruolo);
     }
 
     public void creazioneLezione(Lezione l) {
-        // metodo da implementare
+        // Metodo stub per i test
     }
 
     public void inserisciAulaDisponibile(Aula a) {
-        // inserimento aula
+        // Metodo stub per i test
     }
 
     public void visualizzaEventualiConflitti() {
-        // controllo conflitti
+        // Metodo stub per i test
     }
 }

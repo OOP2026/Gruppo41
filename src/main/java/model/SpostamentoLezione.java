@@ -1,7 +1,9 @@
 package model;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
     public class SpostamentoLezione {
     private LocalDate dataRichiesta;
