@@ -1,69 +1,30 @@
 package model;
 
 import java.time.LocalTime;
-import java.util.List;
-import java.time.LocalDate;
-import java.util.ArrayList;
 
-    public class SpostamentoLezione {
-    private LocalDate dataRichiesta;
-    private String stato;
-    private LocalDate nuovaData;
-    private LocalTime nuovoOrarioInizio;
-    private LocalTime nuovoOrarioFine;
+public class SpostamentoLezione {
     private Lezione lezione;
+    private String nuovoGiorno;
+    private LocalTime nuovaOraInizio;
+    private LocalTime nuovaOraFine;
+    private String stato;
 
-    public SpostamentoLezione(LocalDate dataRichiesta, String stato) {
-        this.dataRichiesta = dataRichiesta;
-        this.stato = stato;
-    }
-
-    public LocalDate getDataRichiesta() {
-        return dataRichiesta;
-    }
-
-    public void setDataRichiesta(LocalDate dataRichiesta) {
-
-        this.dataRichiesta = dataRichiesta;
-    }
-
-    public String getStato() {
-        return stato;
-    }
-
-    public void setStato(String stato) {
-        this.stato = stato;
-    }
-
-    public LocalDate getNuovaData() {
-        return nuovaData;
-    }
-
-    public void setNuovaData(LocalDate nuovaData) {
-        this.nuovaData = nuovaData;
-    }
-
-    public LocalTime getNuovoOrarioInizio() {
-        return nuovoOrarioInizio;
-    }
-
-    public void setNuovoOrarioInizio(LocalTime nuovoOrarioInizio) {
-        this.nuovoOrarioInizio = nuovoOrarioInizio;
-    }
-
-    public LocalTime getNuovoOrarioFine() {
-        return nuovoOrarioFine;
-    }
-
-    public void setNuovoOrarioFine(LocalTime nuovoOrarioFine) {
-        this.nuovoOrarioFine = nuovoOrarioFine;
-    }
-
-    public Lezione getLezione() {
-        return lezione;
-    }
-
-    public void setLezione(Lezione lezione) {
+    public SpostamentoLezione(Lezione lezione, String nuovoGiorno, LocalTime nuovaOraInizio, LocalTime nuovaOraFine) {
         this.lezione = lezione;
+        this.nuovoGiorno = nuovoGiorno;
+        this.nuovaOraInizio = nuovaOraInizio;
+        this.nuovaOraFine = nuovaOraFine;
+        this.stato = "IN ATTESA";
     }
+
+    public Lezione getLezione() { return lezione; }
+    public void setLezione(Lezione lezione) { this.lezione = lezione; }
+    public String getNuovoGiorno() { return nuovoGiorno; }
+    public void setNuovoGiorno(String nuovoGiorno) { this.nuovoGiorno = nuovoGiorno; }
+    public LocalTime getNuovaOraInizio() { return nuovaOraInizio; }
+    public void setNuovaOraInizio(LocalTime nuovaOraInizio) { this.nuovaOraInizio = nuovaOraInizio; }
+    public LocalTime getNuovaOraFine() { return nuovaOraFine; }
+    public void setNuovaOraFine(LocalTime nuovaOraFine) { this.nuovaOraFine = nuovaOraFine; }
+    public String getStato() { return stato; }
+    public void setStato(String stato) { this.stato = stato; }
 }
