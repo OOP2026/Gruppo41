@@ -1,7 +1,7 @@
 package implementazioneDao;
 
 import dao.UtenteDAO;
-import database_connection.ConnessioneDB;
+import database_connection.ConnessioneDatabase;
 import model.Utente;
 import model.Studente;
 import model.Docente;
@@ -12,7 +12,7 @@ public class UtentePostgresDAO implements UtenteDAO {
 
     public UtentePostgresDAO() {
         try {
-            this.connection = ConnessioneDB.getInstance().getConnection();
+            this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
