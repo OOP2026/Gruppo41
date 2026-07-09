@@ -9,9 +9,11 @@ import org.junit.runner.RunWith;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 @RunWith(ArchUnitRunner.class)
-@AnalyzeClasses(packages = "project")
+@AnalyzeClasses(packages = {"controller", "dao", "database_connection", "gui", "implementazioneDao", "model"})
 public class CyclicDependencyTest {
+
     @ArchTest
     public static final ArchRule no_cyclic_dependencies = slices()
-            .matching("project.(*)..").should().beFreeOfCycles();
+            .matching("(*)..")
+            .should().beFreeOfCycles();
 }
