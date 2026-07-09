@@ -1,32 +1,50 @@
 package gui;
 
 import controller.Controller;
-import model.Coordinatore;
+import model.SpostamentoLezione;
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
-    class CoordinatorePanel extends JPanel {
-    public CoordinatorePanel(Coordinatore coordinatore, Controller controller) {
-        setLayout(new BorderLayout());
+public class CoordinatoreFrame extends ResponsabileOrarioFrame {
+    private JButton gestisciRichiesteButton;
 
-        JLabel header = new JLabel("Pannello di Controllo Coordinatore: " + coordinatore.getNome(), SwingConstants.CENTER);
-        header.setFont(new Font("Arial", Font.BOLD, 14));
-        add(header, BorderLayout.NORTH);
+    public CoordinatoreFrame(Controller controller) {
+        super(controller);
+        setTitle("Pannello Coordinatore Corso - Controllo Totale");
 
-        JPanel actionsPanel = new JPanel(new FlowLayout());
-        JButton btnApprova = new JButton("Approva Richiesta");
-        JButton btnRifiuta = new JButton("Rifiuta Richiesta");
-        JButton btnModifica = new JButton("Modifica Orario Lezione");
+        JPanel bottomPanel = (JPanel) getContentPane().getComponent(2);
+        gestisciRichiesteButton = new JButton("Valuta Richieste Spostamento");
+        bottomPanel.add(gestisciRichiesteButton, 0);
 
-        actionsPanel.add(btnApprova);
-        actionsPanel.add(btnRifiuta);
-        actionsPanel.add(btnModifica);
-        add(actionsPanel, BorderLayout.CENTER);
-
-        // Esempio logica di approvazione
-        btnApprova.addActionListener(e -> {
-            // Qui passeresti la richiesta selezionata dalla GUI
-            JOptionPane.showMessageDialog(this, "Richiesta Approvata con successo dal Coordinatore.");
-        });
+        gestisciRichiesteButton.addActionListener(e -> mostraDialogRichieste());
     }
-}
+
+    private void mostraDialogRichieste() {
+        List<SpostamentoLezione> richieste = controller.getRichiesteSpostamento();
+        if (richieste == null || richieste.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nessuna richiesta di spostamento in attesa.", "Stato Richieste", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] opzioni = {"Approva", "Rifiuta", "Annulla"};
+        for (SpostamentoLezione s : richieste) {
+            if ("IN ATTESA".equals(s.getStato())) {
+                String msg = "Richiesta di spostamento per: " + s.getLezione().getInsegnamento().getNome() + "\n" +
+                        "Da: " + s.getLezione().getGiornoSettimana() + "\n" +
+                        "A: " + s.getNuovoGiorno() + " dalle " + s.getNuovaOraInizio() + " alle " + s.getNuovaOraFine();
+
+                int scelta = JOptionPane.showOptionDialog(this, msg, "Valutazione Spostamento",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[2]);
+
+                if (scelta == 0) {
+                    controller.aggiornaStatoSpostamento(s, "APPROVATA");
+                    JOptionPane.showMessageDialog(this, "Richiesta Approvata!");
+                } else if (scelta == 1) {
+                    controller.aggiornaStatoSpostamento(s, "RIFIUTATA");
+                    JOptionPane.showMessageDialog(this, "Richiesta Rifiutata!");
+                }
+            }
+        }
+        aggiornaTabellaOrari(controller.getLezioni());
+    }
