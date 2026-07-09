@@ -1,58 +1,42 @@
 package gui;
 
 import controller.Controller;
-import model.*;
-
+import model.Lezione;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.List;
 
-    public class MainFrame extends JFrame {
+public class MainFrame extends JFrame {
+    protected Controller controller;
+    protected JTable table;
+    protected DefaultTableModel tableModel;
 
-    private CardLayout cardLayout;
-    private JPanel mainPanel;
-    private Controller controller;
-
-    public MainFrame(Controller controller) {
+    public MainFrame(Controller controller, String titolo) {
         this.controller = controller;
-
-        setTitle("Sistema Gestione Orari Università");
-        setSize(800, 600);
+        setTitle(titolo);
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        cardLayout = new CardLayout();
-        mainPanel = new JPanel(cardLayout);
-
-        // Inizializza e aggiunge il pannello di Login
-        LoginPanel loginPanel = new LoginPanel(this, controller);
-        mainPanel.add(loginPanel, "LOGIN");
-
-        add(mainPanel);
-        cardLayout.show(mainPanel, "LOGIN");
+        String[] columns = {"Giorno", "Ora Inizio", "Ora Fine", "Insegnamento", "Aula", "Docente"};
+        tableModel = new DefaultTableModel(columns, 0);
+        table = new JTable(tableModel);
+        add(new JScrollPane(table), BorderLayout.CENTER);
     }
 
-    // Metodo cruciale: viene chiamato dal LoginPanel per cambiare schermata in base al ruolo
-    public void cambiaSchermata(Utente utente) {
-        String cardName = "";
-
-        if (utente instanceof ResponsabileOrario) {
-            cardName = "RESPONSABILE";
-            mainPanel.add(new ResponsabileOrarioPanel((ResponsabileOrario) utente, controller), cardName);
-        } else if (utente instanceof Coordinatore) {
-            cardName = "COORDINATORE";
-            mainPanel.add(new CoordinatorePanel((Coordinatore) utente, controller), cardName);
-        } else if (utente instanceof Docente) {
-            cardName = "DOCENTE";
-            mainPanel.add(new DocentePanel((Docente) utente, controller), cardName);
-        } else if (utente instanceof Studente) {
-            cardName = "STUDENTE";
-            mainPanel.add(new StudentePanel((Studente) utente, controller), cardName);
+    protected void aggiornaTabellaOrari(List<Lezione> lezioni) {
+        tableModel.setRowCount(0);
+        for (Lezione l : lezioni) {
+            tableModel.addRow(new Object[]{
+                    l.getGiornoSettimana(),
+                    l.getOraInizio().toString(),
+                    l.getOraFine().toString(),
+                    l.getInsegnamento().getNome(),
+                    l.getAula().getNome(),
+                    l.getInsegnamento().getDocente().getNome() + " " + l.getInsegnamento().getDocente().getCognome()
+            });
         }
-
-        cardLayout.show(mainPanel, cardName);
-    }
-    
-    public void mostraLogin() {
-        cardLayout.show(mainPanel, "LOGIN");
     }
 }
