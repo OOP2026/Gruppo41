@@ -4,16 +4,16 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class ConnessioneDB {
+public class ConnessioneDatabase {
     
-    private static ConnessioneDB instance;
+    private static ConnessioneDatabase instance;
     private Connection connection;
     
     private final String url = "jdbc:postgresql://localhost:5432/nome_tuo_db";
     private final String user = "postgres";
     private final String password = "la_tua_password_di_postgres";
 
-    private ConnessioneDB() {
+    private ConnessioneDatabase() {
         try {
             Class.forName("org.postgresql.Driver");
             this.connection = DriverManager.getConnection(url, user, password);
@@ -27,9 +27,9 @@ public class ConnessioneDB {
         }
     }
 
-    public static ConnessioneDB getInstance() throws SQLException {
+    public static ConnessioneDatabase getInstance() throws SQLException {
         if (instance == null || instance.getConnection().isClosed()) {
-            instance = new ConnessioneDB();
+            instance = new ConnessioneDatabase();
         }
         return instance;
     }
