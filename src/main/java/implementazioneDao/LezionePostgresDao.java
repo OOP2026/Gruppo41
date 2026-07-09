@@ -1,7 +1,7 @@
 package implementazioneDao;
 
 import dao.LezioneDAO;
-import database_connection.ConnessioneDB;
+import database_connection.ConnessioneDatabase;
 import model.*;
 import java.sql.*;
 import java.time.LocalTime;
@@ -13,7 +13,7 @@ public class LezionePostgresDAO implements LezioneDAO {
 
     public LezionePostgresDAO() {
         try {
-            this.connection = ConnessioneDB.getInstance().getConnection();
+            this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -159,74 +159,33 @@ public class LezionePostgresDAO implements LezioneDAO {
         }
     }
 
- @Override
-    public boolean richiediSpostamento(SpostamentoLezione spostamento) {
-        String query = "INSERT INTO spostamento (insegnamento_id, giorno_corrente, nuovo_giorno, nuova_ora_inizio, nuova_ora_fine, stato) VALUES (?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, spostamento.getLezione().getInsegnamento().getNome());
-            statement.setString(2, spostamento.getLezione().getGiornoSettimana());
-            statement.setString(3, spostamento.getNuovoGiorno());
-            statement.setTime(4, Time.valueOf(spostamento.getNuovaOraInizio()));
-            statement.setTime(5, Time.valueOf(spostamento.getNuovaOraFine()));
-            statement.setString(6, spostamento.getStato());
-            return statement.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     @Override
     public List<SpostamentoLezione> getRichiesteSpostamento() {
         List<SpostamentoLezione> lista = new ArrayList<>();
         String query = "SELECT * FROM spostamento s " +
                        "JOIN insegnamento i ON s.insegnamento_id = i.nome " +
-                       "JOIN utente u ON i.docente_login = u.login";
+                       "JOIN utente u ON i.docente_login = u.login " +
+                       "JOIN lezione l ON l.insegnamento_id = i.nome AND l.giorno = s.giorno_corrente";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Docente d = new Docente(
-                    resultSet.getString("nome"), 
-                    resultSet.getString("cognome"), 
-                    resultSet.getString("email"), 
-                    resultSet.getString("login"), 
-                    ""
-                );
-                Insegnamento ins = new Insegnamento(
-                    resultSet.getString("insegnamento_id"), 
-                    resultSet.getInt("cfu"), 
-                    resultSet.getString("anno_corso"), 
-                    d
-                );
-                Lezione l = new Lezione(
-                    ins, 
-                    resultSet.getString("giorno_corrente"), 
-                    LocalTime.of(0,0), 
-                    LocalTime.of(0,0), 
-                    new Aula("")
-                );
-                SpostamentoLezione sl = new SpostamentoLezione(
-                    l,
+                Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
+                Insegnamento ins = new Insegnamento(resultSet.getString("insegnamento_id"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d);
+                Aula aula = new Aula(resultSet.getString("aula_nome"));
+                Lezione lez = new Lezione(ins, resultSet.getString("giorno_corrente"), resultSet.getTime("ora_inizio").toLocalTime(), resultSet.getTime("ora_fine").toLocalTime(), aula);
+                
+                SpostamentoLezione spostamento = new SpostamentoLezione(
+                    lez,
                     resultSet.getString("nuovo_giorno"),
                     resultSet.getTime("nuova_ora_inizio").toLocalTime(),
                     resultSet.getTime("nuova_ora_fine").toLocalTime()
                 );
-                sl.setStato(resultSet.getString("stato"));
-                lista.add(sl);
+                spostamento.setStato(resultSet.getString("stato"));
+                lista.add(spostamento);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return lista;
-    }
-
-    @Override
-    public boolean aggiornaStatoSpostamento(SpostamentoLezione spostamento, String stato) {
-<!-- ... existing code ... -->
-    
-    @Override
-    public List<SpostamentoLezione> getRichiesteSpostamento() {
-        List<SpostamentoLezione> lista = new ArrayList<>();
         return lista;
     }
 
