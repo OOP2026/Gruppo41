@@ -1,4 +1,5 @@
 name: Quality Analysis
+
 on:
   push:
     paths:
@@ -15,10 +16,12 @@ on:
       - 'pom.xml'
       - '.github/workflows/pipeline.yaml'
   workflow_dispatch:
+
 permissions:
   contents: read
   actions: read
   checks: write
+
 jobs:
   build:
     name: Quality Analysis
@@ -43,11 +46,11 @@ jobs:
         if: success() || failure()
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: > 
-          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
-          -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }} 
+        run: >
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
           -Dsonar.qualitygate.wait=true
-         
+
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
