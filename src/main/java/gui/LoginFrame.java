@@ -1,62 +1,54 @@
 package gui;
 
 import controller.Controller;
-import model.*;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-    class LoginPanel extends JPanel {
-
-    private JTextField emailField;
+public class LoginFrame extends JFrame {
+    private Controller controller;
+    private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
-    private MainFrame mainFrame;
-    private Controller controller;
 
-    public LoginPanel(MainFrame mainFrame, Controller controller) {
-        this.mainFrame = mainFrame;
+    public LoginFrame(Controller controller) {
         this.controller = controller;
+        setTitle("Sistema Orari - Accedi");
+        setSize(400, 250);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        setLayout(new GridBagLayout());
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
 
-        JLabel titleLabel = new JLabel("ACCESSO AL SISTEMA", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
-        add(titleLabel, gbc);
+        panel.add(new JLabel("Username:"));
+        usernameField = new JTextField();
+        panel.add(usernameField);
 
-        gbc.gridwidth = 1;
-        gbc.gridy = 1; gbc.gridx = 0; add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; emailField = new JTextField(15); add(emailField, gbc);
+        panel.add(new JLabel("Password:"));
+        passwordField = new JPasswordField();
+        panel.add(passwordField);
 
-        gbc.gridy = 2;
-        gbc.gridx = 0; add(new JLabel("Password:"), gbc);
-        gbc.gridx = 1; passwordField = new JPasswordField(15); add(passwordField, gbc);
+        loginButton = new JButton("Accedi");
+        panel.add(new JLabel(""));
+        panel.add(loginButton);
 
-        gbc.gridy = 3; gbc.gridx = 0; gbc.gridwidth = 2;
-        loginButton = new JButton("LOGIN");
-        add(loginButton, gbc);
+        add(panel, BorderLayout.CENTER);
 
-        loginButton.addActionListener(e -> eseguiLogin());
-    }
-
-    private void eseguiLogin() {
-        String email = emailField.getText().trim();
-        String password = new String(passwordField.getPassword());
-
-        // Il controller autentica l'utente e restituisce l'istanza specifica (Studente, Docente, ecc.)
-        Utente utenteLoggato = controller.login(email, password);
-
-        if (utenteLoggato != null) {
-            emailField.setText("");
-            passwordField.setText("");
-            mainFrame.cambiaSchermata(utenteLoggato);
-        } else {
-            JOptionPane.showMessageDialog(this, "Credenziali errate!", "Errore", JOptionPane.ERROR_MESSAGE);
-        }
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+                if (controller.login(username, password)) {
+                    dispose();
+                    controller.mostraInterfacciaUtente();
+                } else {
+                    JOptionPane.showMessageDialog(LoginFrame.this, "Credenziali non valide", "Errore", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
     }
 }
