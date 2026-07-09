@@ -1,36 +1,68 @@
 package gui;
 
 import controller.Controller;
-import model.Studente;
+import model.Lezione;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.stream.Collectors;
 
-    class StudentePanel extends JPanel {
-    public StudentePanel(Studente studente, Controller controller) {
-        setLayout(new BorderLayout());
+public class StudenteFrame extends MainFrame {
+    private JComboBox<String> annoComboBox;
+    private JButton logoutButton;
 
-        JLabel header = new JLabel("Dashboard Studente: " + studente.getNome() + " " + studente.getCognome() + " (Matricola: " + studente.getMatricola() + ")", SwingConstants.CENTER);
-        header.setFont(new Font("Arial", Font.BOLD, 14));
-        header.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-        add(header, BorderLayout.NORTH);
+    public StudenteFrame(Controller controller) {
+        super(controller, "Orario Lezioni - Portale Studenti");
 
-        JPanel centerPanel = new JPanel(new FlowLayout());
-        JButton btnOrario = new JButton("Visualizza Orario Anno di Corso");
-        JButton btnAula = new JButton("Visualizza Aula");
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel welcomeLabel = new JLabel("Profilo Studente: " + 
+                controller.getUtenteLoggato().getNome() + " " + 
+                controller.getUtenteLoggato().getCognome());
+        topPanel.add(welcomeLabel, BorderLayout.WEST);
 
-        centerPanel.add(btnOrario);
-        centerPanel.add(btnAula);
-        add(centerPanel, BorderLayout.CENTER);
+        logoutButton = new JButton("Disconnetti");
+        topPanel.add(logoutButton, BorderLayout.EAST);
+        add(topPanel, BorderLayout.NORTH);
 
-        // Azioni
-        btnOrario.addActionListener(e -> {
-            studente.visualizzaOrarioAnnoDiCorso();
-            JOptionPane.showMessageDialog(this, "Funzionalità 'Visualizza Orario' invocata sul modello.");
+        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        filterPanel.add(new JLabel("Filtra per Anno di Corso:"));
+        annoComboBox = new JComboBox<>(new String[]{"Tutti", "I", "II", "III"});
+        filterPanel.add(annoComboBox);
+        add(filterPanel, BorderLayout.SOUTH);
+
+        annoComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                caricaDatiLezioni();
+            }
         });
 
-        btnAula.addActionListener(e -> {
-            studente.visualizzaAula();
-            JOptionPane.showMessageDialog(this, "Funzionalità 'Visualizza Aula' invocata sul modello.");
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.logout();
+                dispose();
+                controller.avviaApplicazione();
+            }
         });
+
+        caricaDatiLezioni();
+    }
+
+    private void caricaDatiLezioni() {
+        String filtro = (String) annoComboBox.getSelectedItem();
+        List<Lezione> lezioni;
+        if ("Tutti".equals(filtro)) {
+            lezioni = controller.getLezioni();
+        } else {
+            lezioni = controller.getLezioni().stream()
+                    .filter(l -> l.getInsegnamento().getAnnoCorso().equals(filtro))
+                    .collect(Collectors.toList());
+        }
+        aggiornaTabellaOrari(lezioni);
     }
 }
