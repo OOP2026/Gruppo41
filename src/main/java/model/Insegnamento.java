@@ -1,51 +1,24 @@
 package model;
 
-import java.time.LocalTime;
-import java.util.List;
-import java.util.ArrayList;
-
-    public class Insegnamento {
+public class Insegnamento {
     private String nome;
     private int cfu;
-    private int annoCorso;
-    private List<Lezione> lezioni;
+    private String annoCorso;
+    private Docente docente;
 
-    public Insegnamento(String nome, int cfu, int annoCorso) {
+    public Insegnamento(String nome, int cfu, String annoCorso, Docente docente) {
         this.nome = nome;
         this.cfu = cfu;
         this.annoCorso = annoCorso;
+        this.docente = docente;
     }
 
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public int getCfu() {
-        return cfu;
-    }
-
-    public void setCfu(int cfu) {
-        this.cfu = cfu;
-    }
-
-    public int getAnnoCorso() {
-        return annoCorso;
-    }
-
-    public void setAnnoCorso(int annoCorso) {
-        this.annoCorso = annoCorso;
-    }
-
-    public List<Lezione> getLezioni() {
-        return lezioni;
-    }
-
-    public void setLezioni(List<Lezione> lezioni) {
-        this.lezioni = lezioni;
-    }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public int getCfu() { return cfu; }
+    public void setCfu(int cfu) { this.cfu = cfu; }
+    public String getAnnoCorso() { return annoCorso; }
+    public void setAnnoCorso(String annoCorso) { this.annoCorso = annoCorso; }
+    public Docente getDocente() { return docente; }
+    public void setDocente(Docente docente) { this.docente = docente; }
 }
