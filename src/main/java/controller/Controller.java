@@ -4,9 +4,8 @@ import dao.LezioneDAO;
 import dao.UtenteDAO;
 import implementazioneDao.LezionePostgresDAO;
 import implementazioneDao.UtentePostgresDAO;
-import model.Lezione;
-import model.Utente;
-import model.Vincolo;
+import model.*;
+import gui.*;
 import java.util.List;
 
 public class Controller {
@@ -23,7 +22,20 @@ public class Controller {
     }
 
     public void avviaApplicazione() {
-        System.out.println("Applicazione avviata. In attesa di interazione con la GUI.");
+        LoginFrame loginFrame = new LoginFrame(this);
+        loginFrame.setVisible(true);
+    }
+
+    public void mostraInterfacciaUtente() {
+        if (utenteLoggato instanceof Coordinatore) {
+            new CoordinatoreFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof ResponsabileOrario) {
+            new ResponsabileOrarioFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof Docente) {
+            new DocenteFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof Studente) {
+            new StudenteFrame(this).setVisible(true);
+        }
     }
 
     public boolean login(String login, String password) {
@@ -57,6 +69,28 @@ public class Controller {
             return true;
         }
         return false;
+    }
+
+    public boolean aggiungiVincolo(Vincolo v) {
+        if (utenteLoggato instanceof Docente) {
+            Docente d = (Docente) utenteLoggato;
+            if (d.aggiungiVincolo(v)) {
+                return lezioneDao.inserisciVincolo(d.getLogin(), v);
+            }
+        }
+        return false;
+    }
+
+    public boolean richiediSpostamento(SpostamentoLezione s) {
+        return lezioneDao.richiediSpostamento(s);
+    }
+
+    public List<SpostamentoLezione> getRichiesteSpostamento() {
+        return lezioneDao.getRichiesteSpostamento();
+    }
+
+    public boolean aggiornaStatoSpostamento(SpostamentoLezione s, String stato) {
+        return lezioneDao.aggiornaStatoSpostamento(s, stato);
     }
 
     private boolean verificaConflitti(Lezione nuova) {
