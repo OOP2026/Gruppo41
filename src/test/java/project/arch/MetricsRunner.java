@@ -1,6 +1,5 @@
 package project.arch;
 
-import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaPackage;
 import com.tngtech.archunit.core.importer.ClassFileImporter;
@@ -8,16 +7,17 @@ import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.library.metrics.ArchitectureMetrics;
 import com.tngtech.archunit.library.metrics.ComponentDependencyMetrics;
 import com.tngtech.archunit.library.metrics.MetricsComponents;
-
 import java.util.Set;
 
 public class MetricsRunner {
     public static void main(String[] args) {
-        JavaClasses classes = new ClassFileImporter().withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS).importPackages("project");
-        Set<JavaPackage> packages = classes.getPackage("project").getSubpackages();
+        JavaClasses classes = new ClassFileImporter()
+                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
+                .importPackages("controller", "dao", "database_connection", "gui", "implementazioneDao", "model");
+
+        Set<JavaPackage> packages = classes.getPackage("controller").getSubpackages();
 
         MetricsComponents<JavaClass> components = MetricsComponents.fromPackages(packages);
-
         ComponentDependencyMetrics metrics = ArchitectureMetrics.componentDependencyMetrics(components);
 
         components.stream().forEach(component -> {
