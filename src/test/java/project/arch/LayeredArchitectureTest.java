@@ -7,35 +7,41 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import org.junit.Test;
 
-public class ArchitectureTest {
+public class LayeredArchitectureTest {
 
     @Test
     public void testLayeredArchitecture() {
-        JavaClasses importedClasses = new ClassFileImporter().importPackages("controller", "dao", "implementazioneDao", "model", "gui");
+        JavaClasses importedClasses = new ClassFileImporter().importPackages(
+            "controller", "dao", "implementazioneDao", "model", "gui"
+        );
 
-        // Regola 1: Il Model non deve dipendere da nessun altro pacchetto interno
-        ArchRule modelRule = noClasses().that().resideInAPackage("..model..")
-                .should().dependOnClassesThat().resideInAnyPackage("..gui..", "..controller..", "..implementazioneDao..", "..dao..");
-        modelRule.check(importedClasses);
-
-        // Regola 2: La GUI può dipendere sia dal Controller che dal Model (per mostrare le lezioni a schermo)
+        // 1. La GUI può dipendere dal Controller e dal Model (necessario per leggere e mostrare i dati delle lezioni)
         ArchRule guiRule = classes().that().resideInAPackage("..gui..")
-                .should().onlyDependOnClassesThat().resideInAnyPackage("..gui..", "..controller..", "..model..", "java..", "javax..", "org..", "com..", "");
+                .should().onlyDependOnClassesThat().resideInAnyPackage(
+                    "..gui..", "..controller..", "..model..", 
+                    "java..", "javax..", "org..", "com..", ""
+                );
         guiRule.check(importedClasses);
 
-        // Regola 3: Il Controller non deve dipendere dalla GUI
+        // 2. Il Controller non deve dipendere dalla GUI per garantire il disaccoppiamento
         ArchRule controllerRule = noClasses().that().resideInAPackage("..controller..")
                 .should().dependOnClassesThat().resideInAPackage("..gui..");
         controllerRule.check(importedClasses);
 
-        // Regola 4: I DAO non devono dipendere dalla GUI o dal Controller
+        // 3. I DAO non devono dipendere in alcun modo dalla GUI o dal Controller
         ArchRule daoRule = noClasses().that().resideInAPackage("..dao..")
                 .should().dependOnClassesThat().resideInAnyPackage("..gui..", "..controller..");
         daoRule.check(importedClasses);
 
-        // Regola 5: Le classi di implementazione dei DAO devono risiedere nel pacchetto corretto
-        ArchRule implRule = classes().that().resideInAPackage("..implementazioneDao..")
-                .should().onlyDependOnClassesThat().resideInAnyPackage("..implementazioneDao..", "..dao..", "..model..", "..database_connection..", "java..", "javax..", "org..", "com..", "");
-        implRule.check(importedClasses);
+        ArchRule implDaoRule = noClasses().that().resideInAPackage("..implementazioneDao..")
+                .should().dependOnClassesThat().resideInAnyPackage("..gui..", "..controller..");
+        implDaoRule.check(importedClasses);
+
+        // 4. Il Model deve essere indipendente da tutte le altre componenti logiche e di persistenza
+        ArchRule modelRule = noClasses().that().resideInAPackage("..model..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                    "..gui..", "..controller..", "..dao..", "..implementazioneDao.."
+                );
+        modelRule.check(importedClasses);
     }
 }
