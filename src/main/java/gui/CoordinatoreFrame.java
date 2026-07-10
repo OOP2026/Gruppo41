@@ -48,3 +48,4 @@ public class CoordinatoreFrame extends ResponsabileOrarioFrame {
         }
         aggiornaTabellaOrari(controller.getLezioni());
     }
+}
