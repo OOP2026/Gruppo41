@@ -6,7 +6,7 @@ on:
       - 'src/**'
       - 'pom.xml'
       - 'README.md'
-      - '.github/workflows/pipeline.yaml'
+      - '.github/workflows/pipeline.yml'
     branches:
       - main
   pull_request:
@@ -14,7 +14,7 @@ on:
     paths:
       - 'src/**'
       - 'pom.xml'
-      - '.github/workflows/pipeline.yaml'
+      - '.github/workflows/pipeline.yml'
   workflow_dispatch:
 
 permissions:
@@ -49,8 +49,11 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+          -Dsonar.projectKey=OOP2026_Gruppo41
+          -Dsonar.organization=oop2026
+          -Dsonar.host.url=https://sonarcloud.io
           -Dsonar.qualitygate.wait=true
+          -Dsonar.verbose=true
 
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
