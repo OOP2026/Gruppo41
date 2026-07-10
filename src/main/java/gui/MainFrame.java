@@ -9,8 +9,12 @@ import java.util.List;
 
 public class MainFrame extends JFrame {
     protected Controller controller;
-    protected JTable table;
+    protected JTable tabellaOrari;
     protected DefaultTableModel tableModel;
+
+    public MainFrame(Controller controller) {
+        this(controller, "Orario Accademico Ufficiale");
+    }
 
     public MainFrame(Controller controller, String titolo) {
         this.controller = controller;
@@ -20,23 +24,51 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        String[] columns = {"Giorno", "Ora Inizio", "Ora Fine", "Insegnamento", "Aula", "Docente"};
-        tableModel = new DefaultTableModel(columns, 0);
-        table = new JTable(tableModel);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        JPanel topPanel = new JPanel();
+        topPanel.setBackground(new Color(41, 128, 185));
+        JLabel lblTitle = new JLabel(titolo);
+        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
+        lblTitle.setForeground(Color.WHITE);
+        topPanel.add(lblTitle);
+        add(topPanel, BorderLayout.NORTH);
+
+        String[] colonne = {"Insegnamento", "Docente", "Giorno", "Ora Inizio", "Ora Fine", "Aula"};
+        tableModel = new DefaultTableModel(colonne, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tabellaOrari = new JTable(tableModel);
+        add(new JScrollPane(tabellaOrari), BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.addActionListener(e -> {
+            controller.logout();
+            this.dispose();
+            controller.avviaApplicazione();
+        });
+        bottomPanel.add(btnLogout);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        aggiornaTabellaOrari(controller.getLezioni());
     }
 
-    protected void aggiornaTabellaOrari(List<Lezione> lezioni) {
+    protected void aggiornaTabellaOrari(List<Lezione> lista) {
         tableModel.setRowCount(0);
-        for (Lezione l : lezioni) {
-            tableModel.addRow(new Object[]{
+        if (lista != null) {
+            for (Lezione l : lista) {
+                Object[] riga = {
+                    l.getInsegnamento().getNome(),
+                    l.getInsegnamento().getDocente().getCognome() + " " + l.getInsegnamento().getDocente().getNome(),
                     l.getGiornoSettimana(),
                     l.getOraInizio().toString(),
                     l.getOraFine().toString(),
-                    l.getInsegnamento().getNome(),
-                    l.getAula().getNome(),
-                    l.getInsegnamento().getDocente().getNome() + " " + l.getInsegnamento().getDocente().getCognome()
-            });
+                    l.getAula().getNome()
+                };
+                tableModel.addRow(riga);
+            }
         }
     }
 }
