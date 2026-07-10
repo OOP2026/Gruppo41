@@ -7,10 +7,10 @@ import model.Studente;
 import model.Docente;
 import java.sql.*;
 
-public class UtentePostgresDAO implements UtenteDAO {
+public class UtentePostgresDao implements UtenteDAO {
     private Connection connection;
 
-    public UtentePostgresDAO() {
+    public UtentePostgresDao() {
         try {
             this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
