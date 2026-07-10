@@ -2,8 +2,8 @@ package controller;
 
 import dao.UtenteDAO;
 import dao.LezioneDAO;
-import implementazioneDao.UtentePostgresDao;
-import implementazioneDao.LezionePostgresDao;
+import implementazioneDao.UtentePostgresDAO;
+import implementazioneDao.LezionePostgresDAO;
 import model.*;
 import gui.*;
 
@@ -18,8 +18,8 @@ public class Controller {
     private Utente utenteLoggato;
 
     public Controller() {
-        this.utenteDao = new UtentePostgresDao();
-        this.lezioneDao = new LezionePostgresDao();
+        this.utenteDao = new UtentePostgresDAO();
+        this.lezioneDao = new LezionePostgresDAO();
         this.lezioni = new ArrayList<>();
     }
 
