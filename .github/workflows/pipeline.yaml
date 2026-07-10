@@ -42,6 +42,16 @@ jobs:
         id: maven-build
         run: mvn -B verify
 
+      - name: Sonar Analysis (Forced Bypass)
+        if: success() || failure()
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+          -Dsonar.qualitygate.wait=true
+
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
