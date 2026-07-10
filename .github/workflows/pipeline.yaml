@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Fondamentale per SonarCloud per ricostruire la cronologia dei commit
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -42,18 +42,15 @@ jobs:
         id: maven-build
         run: mvn -B verify
 
-      - name: Sonar Analysis (Forced Bypass)
-        if: success() || failure()
-        continue-on-error: true
+      - name: Sonar Analysis (Forced Update)
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Necessario a Sonar per mappare il progetto e i PR
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Il token segreto di SonarCloud
         run: >
           mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
           -Dsonar.projectKey=OOP2026_Gruppo41
           -Dsonar.organization=oop2026
           -Dsonar.host.url=https://sonarcloud.io
-          -Dsonar.qualitygate.wait=true
-          -Dsonar.verbose=true
 
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
