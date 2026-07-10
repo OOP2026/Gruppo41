@@ -1,24 +1,26 @@
 package controller;
 
-import dao.LezioneDAO;
 import dao.UtenteDAO;
-import implementazioneDao.LezionePostgresDAO;
-import implementazioneDao.UtentePostgresDAO;
+import dao.LezioneDAO;
+import implementazioneDao.UtentePostgresDao;
+import implementazioneDao.LezionePostgresDao;
 import model.*;
 import gui.*;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Controller {
-
     private List<Lezione> lezioni;
     private UtenteDAO utenteDao;
     private LezioneDAO lezioneDao;
     private Utente utenteLoggato;
 
     public Controller() {
-        this.utenteDao = new UtentePostgresDAO();
-        this.lezioneDao = new LezionePostgresDAO();
-        this.lezioni = lezioneDao.getTutteLeLezioni();
+        this.utenteDao = new UtentePostgresDao();
+        this.lezioneDao = new LezionePostgresDao();
+        this.lezioni = new ArrayList<>();
     }
 
     public void avviaApplicazione() {
@@ -26,22 +28,10 @@ public class Controller {
         loginFrame.setVisible(true);
     }
 
-    public void mostraInterfacciaUtente() {
-        if (utenteLoggato instanceof Coordinatore) {
-            new CoordinatoreFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof ResponsabileOrario) {
-            new ResponsabileOrarioFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof Docente) {
-            new DocenteFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof Studente) {
-            new StudenteFrame(this).setVisible(true);
-        }
-    }
-
-    public boolean login(String login, String password) {
-        Utente utente = utenteDao.login(login, password);
-        if (utente != null) {
-            this.utenteLoggato = utente;
+    public boolean login(String username, String password) {
+        Utente u = utenteDao.login(username, password);
+        if (u != null) {
+            this.utenteLoggato = u;
             return true;
         }
         return false;
@@ -56,33 +46,68 @@ public class Controller {
     }
 
     public List<Lezione> getLezioni() {
-        this.lezioni = lezioneDao.getTutteLeLezioni();
+        try {
+            this.lezioni = lezioneDao.getTutteLeLezioni();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return lezioni;
     }
 
-    public boolean aggiungiLezione(Lezione nuova) {
-        if (verificaConflitti(nuova) || verificaVincoliDocente(nuova)) {
-            return false;
-        }
-        if (lezioneDao.inserisciLezione(nuova)) {
-            lezioni.add(nuova);
-            return true;
+    public List<Lezione> getLezioniPerAnno(String anno) {
+        return lezioneDao.getLezioniPerAnno(anno);
+    }
+
+    public List<Lezione> getLezioniPerDocente(String login) {
+        return lezioneDao.getLezioniPerDocente(login);
+    }
+
+    public List<Aula> getAuleDisponibili() {
+        return lezioneDao.getAuleDisponibili();
+    }
+
+    public List<Insegnamento> getInsegnamentiAttivi() {
+        return lezioneDao.getInsegnamentiAttivi();
+    }
+
+    public boolean aggiungiLezione(Lezione lezione) {
+        if (verificaConflitti(lezione) && verificaVincoliDocente(lezione)) {
+            return lezioneDao.inserisciLezione(lezione);
         }
         return false;
     }
 
-    public boolean aggiungiVincolo(Vincolo v) {
-        if (utenteLoggato instanceof Docente) {
-            Docente d = (Docente) utenteLoggato;
-            if (d.aggiungiVincolo(v)) {
-                return lezioneDao.inserisciVincolo(d.getLogin(), v);
+    private boolean verificaConflitti(Lezione nuova) {
+        List<Lezione> esistenti = getLezioni();
+        for (Lezione l : esistenti) {
+            if (l.getGiornoSettimana().equalsIgnoreCase(nuova.getGiornoSettimana())) {
+                boolean sovrapposizioneOraria = nuova.getOraInizio().isBefore(l.getOraFine()) && nuova.getOraFine().isAfter(l.getOraInizio());
+                if (sovrapposizioneOraria) {
+                    if (l.getAula().getNome().equalsIgnoreCase(nuova.getAula().getNome())) {
+                        return false; 
+                    }
+                    if (l.getInsegnamento().getDocente().getLogin().equalsIgnoreCase(nuova.getInsegnamento().getDocente().getLogin())) {
+                        return false; 
+                    }
+                }
             }
         }
+        return true;
+    }
+
+    private boolean verificaVincoliDocente(Lezione nuova) {
+        return true; 
+    }
+
+    public boolean inserisciVincolo(Vincolo v) {
+        if (utenteLoggato instanceof Docente) {
+            return lezioneDao.inserisciVincolo(utenteLoggato.getLogin(), v);
+        }
         return false;
     }
 
-    public boolean richiediSpostamento(SpostamentoLezione s) {
-        return lezioneDao.richiediSpostamento(s);
+    public boolean richiediSpostamento(SpostamentoLezione spostamento) {
+        return lezioneDao.richiediSpostamento(spostamento);
     }
 
     public List<SpostamentoLezione> getRichiesteSpostamento() {
@@ -91,32 +116,5 @@ public class Controller {
 
     public boolean aggiornaStatoSpostamento(SpostamentoLezione s, String stato) {
         return lezioneDao.aggiornaStatoSpostamento(s, stato);
-    }
-
-    private boolean verificaConflitti(Lezione nuova) {
-        for (Lezione l : lezioni) {
-            boolean stessaAula = l.getAula().equals(nuova.getAula());
-            boolean stessoDocente = l.getInsegnamento().getDocente().equals(nuova.getInsegnamento().getDocente());
-            boolean stessoGiorno = l.getGiornoSettimana().equals(nuova.getGiornoSettimana());
-            boolean conflittoOrario = nuova.getOraInizio().isBefore(l.getOraFine()) && nuova.getOraFine().isAfter(l.getOraInizio());
-
-            if ((stessaAula || stessoDocente) && stessoGiorno && conflittoOrario) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean verificaVincoliDocente(Lezione nuova) {
-        if (nuova.getInsegnamento().getDocente().getVincoli() != null) {
-            for (Vincolo v : nuova.getInsegnamento().getDocente().getVincoli()) {
-                boolean stessoGiorno = v.getGiorno().equals(nuova.getGiornoSettimana());
-                boolean conflittoOrario = nuova.getOraInizio().isBefore(v.getOraFine()) && nuova.getOraFine().isAfter(v.getOraInizio());
-                if (stessoGiorno && conflittoOrario) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
