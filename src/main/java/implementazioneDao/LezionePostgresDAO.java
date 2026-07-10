@@ -8,10 +8,10 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LezionePostgresDao implements LezioneDAO {
+public class LezionePostgresDAO implements LezioneDAO {
     private Connection connection;
 
-    public LezionePostgresDao() {
+    public LezionePostgresDAO() {
         try {
             this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
@@ -22,7 +22,7 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<Lezione> getTutteLeLezioni() {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.lezione l JOIN %SCHEMA%.insegnamento i ON l.insegnamento_id = i.nome JOIN %SCHEMA%.utente u ON i.docente_login = u.login";
+        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -41,7 +41,7 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerAnno(String annoCorso) {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.lezione l JOIN %SCHEMA%.insegnamento i ON l.insegnamento_id = i.nome JOIN %SCHEMA%.utente u ON i.docente_login = u.login WHERE i.anno_corso = ?";
+        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login WHERE i.anno_corso = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, annoCorso);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -62,7 +62,7 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerDocente(String loginDocente) {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.lezione l JOIN %SCHEMA%.insegnamento i ON l.insegnamento_id = i.nome JOIN %SCHEMA%.utente u ON i.docente_login = u.login WHERE i.docente_login = ?";
+        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login WHERE i.docente_login = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, loginDocente);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -82,7 +82,7 @@ public class LezionePostgresDao implements LezioneDAO {
 
     @Override
     public boolean inserisciLezione(Lezione lezione) {
-        String query = "INSERT INTO %SCHEMA%.lezione (insegnamento_id, giorno, ora_inizio, ora_fine, aula_nome) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO lezione (insegnamento_id, giorno, ora_inizio, ora_fine, aula_nome) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, lezione.getInsegnamento().getNome());
             statement.setString(2, lezione.getGiornoSettimana());
@@ -99,7 +99,7 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<Aula> getAuleDisponibili() {
         List<Aula> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.aula";
+        String query = "SELECT * FROM aula";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -114,7 +114,7 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<Insegnamento> getInsegnamentiAttivi() {
         List<Insegnamento> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.insegnamento i JOIN %SCHEMA%.utente u ON i.docente_login = u.login";
+        String query = "SELECT * FROM insegnamento i JOIN utente u ON i.docente_login = u.login";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -129,7 +129,7 @@ public class LezionePostgresDao implements LezioneDAO {
 
     @Override
     public boolean inserisciVincolo(String loginDocente, Vincolo vincolo) {
-        String query = "INSERT INTO %SCHEMA%.vincolo (docente_login, giorno, ora_inizio, ora_fine) VALUES (?, ?, ?, ?)";
+        String query = "INSERT INTO vincolo (docente_login, giorno, ora_inizio, ora_fine) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, loginDocente);
             statement.setString(2, vincolo.getGiorno());
@@ -144,7 +144,7 @@ public class LezionePostgresDao implements LezioneDAO {
 
     @Override
     public boolean richiediSpostamento(SpostamentoLezione spostamento) {
-        String query = "INSERT INTO %SCHEMA%.spostamento (insegnamento_id, giorno_corrente, nuovo_giorno, nuova_ora_inizio, nuova_ora_fine, stato) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO spostamento (insegnamento_id, giorno_corrente, nuovo_giorno, nuova_ora_inizio, nuova_ora_fine, stato) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, spostamento.getLezione().getInsegnamento().getNome());
             statement.setString(2, spostamento.getLezione().getGiornoSettimana());
@@ -162,10 +162,10 @@ public class LezionePostgresDao implements LezioneDAO {
     @Override
     public List<SpostamentoLezione> getRichiesteSpostamento() {
         List<SpostamentoLezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM %SCHEMA%.spostamento s " +
-                       "JOIN %SCHEMA%.insegnamento i ON s.insegnamento_id = i.nome " +
-                       "JOIN %SCHEMA%.utente u ON i.docente_login = u.login " +
-                       "JOIN %SCHEMA%.lezione l ON l.insegnamento_id = i.nome AND l.giorno = s.giorno_corrente";
+        String query = "SELECT * FROM spostamento s " +
+                       "JOIN insegnamento i ON s.insegnamento_id = i.nome " +
+                       "JOIN utente u ON i.docente_login = u.login " +
+                       "JOIN lezione l ON l.insegnamento_id = i.nome AND l.giorno = s.giorno_corrente";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -191,7 +191,7 @@ public class LezionePostgresDao implements LezioneDAO {
 
     @Override
     public boolean aggiornaStatoSpostamento(SpostamentoLezione spostamento, String stato) {
-        String query = "UPDATE %SCHEMA%.spostamento SET stato = ? WHERE insegnamento_id = ? AND giorno_corrente = ?";
+        String query = "UPDATE spostamento SET stato = ? WHERE insegnamento_id = ? AND giorno_corrente = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, stato);
             statement.setString(2, spostamento.getLezione().getInsegnamento().getNome());
