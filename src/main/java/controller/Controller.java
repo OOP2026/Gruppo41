@@ -5,12 +5,14 @@ import dao.LezioneDAO;
 import implementazioneDao.UtentePostgresDAO;
 import implementazioneDao.LezionePostgresDAO;
 import model.*;
-import gui.*;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Controller principale dell'applicazione.
+ * Gestisce la logica di business e fa da intermediario tra la GUI e lo strato DAO.
+ */
 public class Controller {
     private List<Lezione> lezioni;
     private UtenteDAO utenteDao;
@@ -23,11 +25,6 @@ public class Controller {
         this.lezioni = new ArrayList<>();
     }
 
-    public void avviaApplicazione() {
-        LoginFrame loginFrame = new LoginFrame(this);
-        loginFrame.setVisible(true);
-    }
-
     public boolean login(String username, String password) {
         Utente u = utenteDao.login(username, password);
         if (u != null) {
@@ -35,20 +32,6 @@ public class Controller {
             return true;
         }
         return false;
-    }
-
-    public void mostraInterfacciaUtente() {
-        if (utenteLoggato == null) return;
-
-        if (utenteLoggato instanceof Coordinatore) {
-            new CoordinatoreFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof ResponsabileOrario) {
-            new ResponsabileOrarioFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof Docente) {
-            new DocenteFrame(this).setVisible(true);
-        } else if (utenteLoggato instanceof Studente) {
-            new StudenteFrame(this).setVisible(true);
-        }
     }
 
     public Utente getUtenteLoggato() {
