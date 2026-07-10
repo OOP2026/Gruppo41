@@ -1,46 +1,47 @@
 package project.arch;
 
-import com.tngtech.archunit.junit.AnalyzeClasses;
-import com.tngtech.archunit.junit.ArchTest;
-import com.tngtech.archunit.junit.ArchUnitRunner;
+import com.tngtech.archunit.core.domain.JavaClasses;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.lang.ArchRule;
-import org.junit.runner.RunWith;
-
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
+import org.junit.Test;
 
-@RunWith(ArchUnitRunner.class)
-@AnalyzeClasses(packages = {"controller", "dao", "database_connection", "gui", "implementazioneDao", "model"})
 public class LayerContainmentTest {
 
-    @ArchTest
-    public static final ArchRule controllers_reside_in_the_controller_layer = classes()
-            .that().haveSimpleNameEndingWith("Controller")
-            .should().resideInAPackage("controller..");
+    @Test
+    public void testLayerContainmentRules() {
+        JavaClasses importedClasses = new ClassFileImporter().importPackages(
+            "controller", "dao", "implementazioneDao", "model", "gui"
+        );
 
-    @ArchTest
-    public static final ArchRule controllers_only_reside_in_the_controller_layer = noClasses()
-            .that().haveSimpleNameNotEndingWith("Controller")
-            .should().resideInAPackage("controller..");
+        // 1. Il pacchetto controller non deve contenere o riferirsi a classi GUI
+        ArchRule controllerContainment = noClasses().that().resideInAPackage("..controller..")
+                .should().dependOnClassesThat().resideInAPackage("..gui..");
+        controllerContainment.check(importedClasses);
 
-    @ArchTest
-    public static final ArchRule DAOs_reside_in_the_DAO_layer = classes()
-            .that().haveSimpleNameEndingWith("DAO")
-            .and().haveSimpleNameNotEndingWith("Dao")
-            .should().resideInAPackage("dao..");
+        // 2. Il pacchetto model non deve riferirsi a nessun altro strato interno del sistema (indipendenza assoluta)
+        ArchRule modelContainment = noClasses().that().resideInAPackage("..model..")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                    "..gui..", "..controller..", "..dao..", "..implementazioneDao.."
+                );
+        modelContainment.check(importedClasses);
 
-    @ArchTest
-    public static final ArchRule DAOs_only_reside_in_the_DAO_layer = noClasses()
-            .that().haveSimpleNameNotEndingWith("DAO")
-            .should().resideInAPackage("dao..");
+        // 3. I DAO (interfacce e implementazioni) non devono dipendere dalla GUI o dal Controller
+        ArchRule daoContainment = noClasses().that().resideInAPackage("..dao..")
+                .should().dependOnClassesThat().resideInAnyPackage("..gui..", "..controller..");
+        daoContainment.check(importedClasses);
 
-    @ArchTest
-    public static final ArchRule DAO_implementations_reside_in_the_DAO_implementation_layer = classes()
-            .that().haveSimpleNameEndingWith("PostgresDAO")
-            .should().resideInAPackage("implementazioneDao..");
+        ArchRule implDaoContainment = noClasses().that().resideInAPackage("..implementazioneDao..")
+                .should().dependOnClassesThat().resideInAnyPackage("..gui..", "..controller..");
+        implDaoContainment.check(importedClasses);
 
-    @ArchTest
-    public static final ArchRule GUIs_reside_in_the_GUI_layer = classes()
-            .that().haveSimpleNameEndingWith("Frame")
-            .should().resideInAPackage("gui..");
+        // 4. La GUI può dipendere dal Controller e dal Model per mostrare i dati a schermo, ma non dai DAO diretti
+        ArchRule guiContainment = classes().that().resideInAPackage("..gui..")
+                .should().onlyDependOnClassesThat().resideInAnyPackage(
+                    "..gui..", "..controller..", "..model..", 
+                    "java..", "javax..", "org..", "com..", ""
+                );
+        guiContainment.check(importedClasses);
+    }
 }
