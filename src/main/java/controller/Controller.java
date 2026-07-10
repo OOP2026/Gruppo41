@@ -37,6 +37,20 @@ public class Controller {
         return false;
     }
 
+    public void mostraInterfacciaUtente() {
+        if (utenteLoggato == null) return;
+
+        if (utenteLoggato instanceof Coordinatore) {
+            new CoordinatoreFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof ResponsabileOrario) {
+            new ResponsabileOrarioFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof Docente) {
+            new DocenteFrame(this).setVisible(true);
+        } else if (utenteLoggato instanceof Studente) {
+            new StudenteFrame(this).setVisible(true);
+        }
+    }
+
     public Utente getUtenteLoggato() {
         return utenteLoggato;
     }
@@ -104,6 +118,10 @@ public class Controller {
             return lezioneDao.inserisciVincolo(utenteLoggato.getLogin(), v);
         }
         return false;
+    }
+
+    public boolean aggiungiVincolo(Vincolo v) {
+        return inserisciVincolo(v);
     }
 
     public boolean richiediSpostamento(SpostamentoLezione spostamento) {
