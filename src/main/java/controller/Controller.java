@@ -9,20 +9,27 @@ import model.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Controller principale dell'applicazione.
- * Gestisce la logica di business e fa da intermediario tra la GUI e lo strato DAO.
- */
 public class Controller {
     private List<Lezione> lezioni;
     private UtenteDAO utenteDao;
     private LezioneDAO lezioneDao;
     private Utente utenteLoggato;
+    private AppLauncher launcher; // Callback per avviare la GUI in modo disaccoppiato
 
     public Controller() {
         this.utenteDao = new UtentePostgresDAO();
         this.lezioneDao = new LezionePostgresDAO();
         this.lezioni = new ArrayList<>();
+    }
+
+    public void setLauncher(AppLauncher launcher) {
+        this.launcher = launcher;
+    }
+
+    public void avviaApplicazione() {
+        if (launcher != null) {
+            launcher.launch();
+        }
     }
 
     public boolean login(String username, String password) {
