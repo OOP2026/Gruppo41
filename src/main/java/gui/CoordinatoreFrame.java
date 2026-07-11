@@ -1,51 +1,98 @@
 package gui;
 
 import controller.Controller;
+import model.Coordinatore;
 import model.SpostamentoLezione;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CoordinatoreFrame extends ResponsabileOrarioFrame {
-    private JButton gestisciRichiesteButton;
+public class CoordinatoreFrame extends JFrame {
 
-    public CoordinatoreFrame(Controller controller) {
-        super(controller);
-        setTitle("Pannello Coordinatore Corso - Controllo Totale");
+    private final DefaultTableModel tableModel;
+    private final Controller controller;
+    private List<SpostamentoLezione> richieste;
 
-        JPanel bottomPanel = (JPanel) getContentPane().getComponent(2);
-        gestisciRichiesteButton = new JButton("Valuta Richieste Spostamento");
-        bottomPanel.add(gestisciRichiesteButton, 0);
+    public CoordinatoreFrame(Coordinatore coordinatore, Controller controller) {
+        this.controller = controller;
 
-        gestisciRichiesteButton.addActionListener(e -> mostraDialogRichieste());
+        setTitle("Pannello di Controllo Coordinatore");
+        setSize(850, 550);
+        setLocationRelativeTo(null);
+
+        setLayout(new BorderLayout());
+
+        JLabel header = new JLabel("Pannello di Controllo Coordinatore: " + coordinatore.getNome(),
+                SwingConstants.CENTER);
+        header.setFont(new Font("Arial", Font.BOLD, 14));
+        add(header, BorderLayout.NORTH);
+
+        String[] colonne = {"Insegnamento", "Giorno attuale", "Orario attuale", "Nuovo giorno", "Nuovo orario", "Stato"};
+        tableModel = new DefaultTableModel(colonne, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable table = new JTable(tableModel);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        add(new JScrollPane(table), BorderLayout.CENTER);
+
+        JPanel actionsPanel = new JPanel(new FlowLayout());
+        JButton btnAggiorna = new JButton("Aggiorna Richieste");
+        JButton btnApprova = new JButton("Approva Richiesta Selezionata");
+        JButton btnRifiuta = new JButton("Rifiuta Richiesta Selezionata");
+
+        actionsPanel.add(btnAggiorna);
+        actionsPanel.add(btnApprova);
+        actionsPanel.add(btnRifiuta);
+        add(actionsPanel, BorderLayout.SOUTH);
+
+        btnAggiorna.addActionListener(e -> caricaRichieste());
+        btnApprova.addActionListener(e -> gestisciRichiesta(table.getSelectedRow(), "APPROVATA"));
+        btnRifiuta.addActionListener(e -> gestisciRichiesta(table.getSelectedRow(), "RIFIUTATA"));
+
+        caricaRichieste();
     }
 
-    private void mostraDialogRichieste() {
-        List<SpostamentoLezione> richieste = controller.getRichiesteSpostamento();
-        if (richieste == null || richieste.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nessuna richiesta di spostamento in attesa.", "Stato Richieste", JOptionPane.INFORMATION_MESSAGE);
+    private void caricaRichieste() {
+        tableModel.setRowCount(0);
+        richieste = controller.getRichiesteSpostamento();
+
+        if (richieste == null) {
             return;
         }
 
-        String[] opzioni = {"Approva", "Rifiuta", "Annulla"};
         for (SpostamentoLezione s : richieste) {
-            if ("IN ATTESA".equals(s.getStato())) {
-                String msg = "Richiesta di spostamento per: " + s.getLezione().getInsegnamento().getNome() + "\n" +
-                        "Da: " + s.getLezione().getGiornoSettimana() + "\n" +
-                        "A: " + s.getNuovoGiorno() + " dalle " + s.getNuovaOraInizio() + " alle " + s.getNuovaOraFine();
-
-                int scelta = JOptionPane.showOptionDialog(this, msg, "Valutazione Spostamento",
-                        JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, opzioni, opzioni[2]);
-
-                if (scelta == 0) {
-                    controller.aggiornaStatoSpostamento(s, "APPROVATA");
-                    JOptionPane.showMessageDialog(this, "Richiesta Approvata!");
-                } else if (scelta == 1) {
-                    controller.aggiornaStatoSpostamento(s, "RIFIUTATA");
-                    JOptionPane.showMessageDialog(this, "Richiesta Rifiutata!");
-                }
-            }
+            tableModel.addRow(new Object[]{
+                    s.getLezione().getInsegnamento().getNome(),
+                    s.getLezione().getGiornoSettimana(),
+                    s.getLezione().getOraInizio() + " - " + s.getLezione().getOraFine(),
+                    s.getNuovoGiorno(),
+                    s.getNuovaOraInizio() + " - " + s.getNuovaOraFine(),
+                    s.getStato()
+            });
         }
-        aggiornaTabellaOrari(controller.getLezioni());
+    }
+
+    private void gestisciRichiesta(int rigaSelezionata, String nuovoStato) {
+        if (rigaSelezionata < 0 || richieste == null || rigaSelezionata >= richieste.size()) {
+            JOptionPane.showMessageDialog(this, "Seleziona prima una richiesta dalla tabella.",
+                    "Nessuna selezione", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        SpostamentoLezione selezionata = richieste.get(rigaSelezionata);
+        boolean successo = controller.aggiornaStatoSpostamento(selezionata, nuovoStato);
+
+        if (successo) {
+            JOptionPane.showMessageDialog(this, "Richiesta " + nuovoStato.toLowerCase() + " con successo.");
+            caricaRichieste();
+        } else {
+            JOptionPane.showMessageDialog(this, "Impossibile aggiornare la richiesta.",
+                    "Errore", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
