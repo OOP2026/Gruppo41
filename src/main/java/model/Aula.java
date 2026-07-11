@@ -3,19 +3,29 @@ package model;
 import java.util.Objects;
 
 public class Aula {
+
     private String nome;
 
     public Aula(String nome) {
         this.nome = nome;
     }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Aula)) {
+            return false;
+        }
         Aula aula = (Aula) o;
         return Objects.equals(nome, aula.nome);
     }
@@ -23,5 +33,10 @@ public class Aula {
     @Override
     public int hashCode() {
         return Objects.hash(nome);
+    }
+
+    @Override
+    public String toString() {
+        return nome;
     }
 }
