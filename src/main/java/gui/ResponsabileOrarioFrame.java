@@ -21,9 +21,6 @@ public class ResponsabileOrarioFrame extends JPanel {
     public ResponsabileOrarioFrame(ResponsabileOrario responsabile, Controller controller) {
         this.controller = controller;
 
-        setTitle("Area di Lavoro: Responsabile Orari");
-        setSize(900, 600);
-        setLocationRelativeTo(null);
 
         setLayout(new BorderLayout());
 
