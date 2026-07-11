@@ -1,31 +1,37 @@
 package gui;
 
 import controller.Controller;
-import model.*;
+import model.Coordinatore;
+import model.Docente;
+import model.ResponsabileOrario;
+import model.Studente;
+import model.Utente;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class LoginFrame extends JFrame {
-    private Controller controller;
-    private JTextField userField;
-    private JPasswordField passField;
-    private JButton loginButton;
+
+    private final JTextField loginField;
+    private final JPasswordField passwordField;
+    private final Controller controller;
 
     public LoginFrame(Controller controller) {
         this.controller = controller;
-        setTitle("Accesso al Sistema Gestione Orari");
-        setSize(400, 300);
+
+        setTitle("Accesso al Sistema");
+        setSize(400, 260);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new GridBagLayout());
-        getContentPane().setBackground(new Color(245, 247, 250));
+        setResizable(false);
 
+        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel titleLabel = new JLabel("Login", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 22));
+        JLabel titleLabel = new JLabel("ACCESSO AL SISTEMA", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -33,50 +39,59 @@ public class LoginFrame extends JFrame {
 
         gbc.gridwidth = 1;
         gbc.gridy = 1;
-        add(new JLabel("Username:"), gbc);
-        userField = new JTextField(15);
-        gbc.gridx = 1;
-        add(userField, gbc);
-
         gbc.gridx = 0;
+        add(new JLabel("Login:"), gbc);
+        gbc.gridx = 1;
+        loginField = new JTextField(15);
+        add(loginField, gbc);
+
         gbc.gridy = 2;
-        add(new JLabel("Password:"), gbc);
-        passField = new JPasswordField(15);
-        gbc.gridx = 1;
-        add(passField, gbc);
-
-        loginButton = new JButton("Accedi");
-        loginButton.setBackground(new Color(41, 128, 185));
-        loginButton.setForeground(Color.WHITE);
-        loginButton.setFocusPainted(false);
         gbc.gridx = 0;
+        add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1;
+        passwordField = new JPasswordField(15);
+        add(passwordField, gbc);
+
         gbc.gridy = 3;
+        gbc.gridx = 0;
         gbc.gridwidth = 2;
+        JButton loginButton = new JButton("LOGIN");
         add(loginButton, gbc);
 
         loginButton.addActionListener(e -> eseguiLogin());
     }
 
     private void eseguiLogin() {
-        String username = userField.getText();
-        String password = new String(passField.getPassword());
+        String login = loginField.getText().trim();
+        String password = new String(passwordField.getPassword());
 
-        if (controller.login(username, password)) {
-            this.dispose();
-            
-            // Gestione della navigazione interamente nello strato GUI (Risolve la violazione ArchUnit)
-            Utente utenteLoggato = controller.getUtenteLoggato();
-            if (utenteLoggato instanceof Coordinatore) {
-                new CoordinatoreFrame(controller).setVisible(true);
-            } else if (utenteLoggato instanceof ResponsabileOrario) {
-                new ResponsabileOrarioFrame(controller).setVisible(true);
-            } else if (utenteLoggato instanceof Docente) {
-                new DocenteFrame(controller).setVisible(true);
-            } else if (utenteLoggato instanceof Studente) {
-                new StudenteFrame(controller).setVisible(true);
-            }
+        boolean successo = controller.login(login, password);
+
+        if (successo) {
+            apriSchermataPerRuolo(controller.getUtenteLoggato());
+            dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Credenziali non valide. Riprova.", "Errore di Accesso", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Credenziali errate!", "Errore", JOptionPane.ERROR_MESSAGE);
+            passwordField.setText("");
         }
+    }
+
+    private void apriSchermataPerRuolo(Utente utente) {
+        JFrame frame;
+
+        if (utente instanceof Coordinatore) {
+            frame = new CoordinatoreFrame((Coordinatore) utente, controller);
+        } else if (utente instanceof ResponsabileOrario) {
+            frame = new ResponsabileOrarioFrame((ResponsabileOrario) utente, controller);
+        } else if (utente instanceof Docente) {
+            frame = new DocenteFrame((Docente) utente, controller);
+        } else if (utente instanceof Studente) {
+            frame = new StudenteFrame((Studente) utente, controller);
+        } else {
+            return;
+        }
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 }
