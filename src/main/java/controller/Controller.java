@@ -14,8 +14,12 @@ import model.Vincolo;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Controller {
+    private static final Logger LOGGER = Logger.getLogger(Controller.class.getName());
+
     private List<Lezione> lezioni;
     private final UtenteDAO utenteDao;
     private final LezioneDAO lezioneDao;
@@ -59,7 +63,7 @@ public class Controller {
         try {
             this.lezioni = lezioneDao.getTutteLeLezioni();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Errore durante il recupero delle lezioni dal database", e);
         }
         return lezioni;
     }
@@ -137,10 +141,6 @@ public class Controller {
             return lezioneDao.inserisciVincolo(utenteLoggato.getLogin(), v);
         }
         return false;
-    }
-
-    public boolean aggiungiVincolo(Vincolo v) {
-        return inserisciVincolo(v);
     }
 
     public boolean richiediSpostamento(SpostamentoLezione spostamento) {
