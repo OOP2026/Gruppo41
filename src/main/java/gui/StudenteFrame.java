@@ -14,7 +14,6 @@ public class StudenteFrame extends JPanel {
     private final DefaultTableModel tableModel;
 
     public StudenteFrame(Studente studente, Controller controller) {
-        // Rimosse le chiamate a setTitle, setSize, setLocationRelativeTo
 
         setLayout(new BorderLayout());
 
