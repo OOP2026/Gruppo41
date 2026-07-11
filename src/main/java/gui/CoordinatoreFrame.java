@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CoordinatoreFrame extends JFrame {
+public class CoordinatoreFrame extends JPanel {
 
     private final DefaultTableModel tableModel;
     private final Controller controller;
