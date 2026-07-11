@@ -2,67 +2,67 @@ package gui;
 
 import controller.Controller;
 import model.Lezione;
+import model.Studente;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class StudenteFrame extends MainFrame {
-    private JComboBox<String> annoComboBox;
-    private JButton logoutButton;
+public class StudenteFrame extends JFrame {
 
-    public StudenteFrame(Controller controller) {
-        super(controller, "Orario Lezioni - Portale Studenti");
+    private final DefaultTableModel tableModel;
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JLabel welcomeLabel = new JLabel("Profilo Studente: " + 
-                controller.getUtenteLoggato().getNome() + " " + 
-                controller.getUtenteLoggato().getCognome());
-        topPanel.add(welcomeLabel, BorderLayout.WEST);
+    public StudenteFrame(Studente studente, Controller controller) {
+        setTitle("Dashboard Studente");
+        setSize(700, 500);
+        setLocationRelativeTo(null);
 
-        logoutButton = new JButton("Disconnetti");
-        topPanel.add(logoutButton, BorderLayout.EAST);
-        add(topPanel, BorderLayout.NORTH);
+        setLayout(new BorderLayout());
 
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filterPanel.add(new JLabel("Filtra per Anno di Corso:"));
-        annoComboBox = new JComboBox<>(new String[]{"Tutti", "I", "II", "III"});
-        filterPanel.add(annoComboBox);
-        add(filterPanel, BorderLayout.SOUTH);
+        JLabel header = new JLabel(
+                "Orario - " + studente.getNome() + " " + studente.getCognome()
+                        + " (Matricola: " + studente.getMatricola() + ", Anno: " + studente.getAnnoCorso() + ")",
+                SwingConstants.CENTER);
+        header.setFont(new Font("Arial", Font.BOLD, 14));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(header, BorderLayout.NORTH);
 
-        annoComboBox.addActionListener(new ActionListener() {
+        String[] colonne = {"Insegnamento", "Giorno", "Ora inizio", "Ora fine", "Aula"};
+        tableModel = new DefaultTableModel(colonne, 0) {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                caricaDatiLezioni();
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-        });
+        };
+        JTable table = new JTable(tableModel);
+        add(new JScrollPane(table), BorderLayout.CENTER);
 
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.logout();
-                dispose();
-                controller.avviaApplicazione();
-            }
-        });
+        JButton btnAggiorna = new JButton("Aggiorna Orario");
+        add(btnAggiorna, BorderLayout.SOUTH);
 
-        caricaDatiLezioni();
+        btnAggiorna.addActionListener(e -> caricaOrario(studente, controller));
+
+        caricaOrario(studente, controller);
     }
 
-    private void caricaDatiLezioni() {
-        String filtro = (String) annoComboBox.getSelectedItem();
-        List<Lezione> lezioni;
-        if ("Tutti".equals(filtro)) {
-            lezioni = controller.getLezioni();
-        } else {
-            lezioni = controller.getLezioni().stream()
-                    .filter(l -> l.getInsegnamento().getAnnoCorso().equals(filtro))
-                    .collect(Collectors.toList());
+    private void caricaOrario(Studente studente, Controller controller) {
+        tableModel.setRowCount(0);
+        List<Lezione> lezioni = controller.getLezioniPerAnno(studente.getAnnoCorso());
+
+        if (lezioni == null || lezioni.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nessuna lezione trovata per il tuo anno di corso.");
+            return;
         }
-        aggiornaTabellaOrari(lezioni);
+
+        for (Lezione l : lezioni) {
+            tableModel.addRow(new Object[]{
+                    l.getInsegnamento().getNome(),
+                    l.getGiornoSettimana(),
+                    l.getOraInizio(),
+                    l.getOraFine(),
+                    l.getAula().getNome()
+            });
+        }
     }
 }
