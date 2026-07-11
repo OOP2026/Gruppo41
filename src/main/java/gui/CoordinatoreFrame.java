@@ -18,9 +18,6 @@ public class CoordinatoreFrame extends JPanel {
     public CoordinatoreFrame(Coordinatore coordinatore, Controller controller) {
         this.controller = controller;
 
-        setTitle("Pannello di Controllo Coordinatore");
-        setSize(850, 550);
-        setLocationRelativeTo(null);
 
         setLayout(new BorderLayout());
 
