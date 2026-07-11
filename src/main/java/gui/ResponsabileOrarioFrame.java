@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-public class ResponsabileOrarioFrame extends JFrame {
+public class ResponsabileOrarioFrame extends JPanel {
 
     private final DefaultTableModel tableModel;
     private final Controller controller;
