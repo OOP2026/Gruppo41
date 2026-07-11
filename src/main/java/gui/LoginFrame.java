@@ -10,7 +10,7 @@ import model.Utente;
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginFrame extends JFrame {
+public class LoginFrame extends JPanel {
 
     private final JTextField loginField;
     private final JPasswordField passwordField;
