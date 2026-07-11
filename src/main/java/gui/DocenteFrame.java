@@ -115,7 +115,7 @@ public class DocenteFrame extends JFrame {
                     LocalTime.parse(fineField.getText().trim())
             );
 
-            boolean successo = controller.aggiungiVincolo(vincolo);
+            boolean successo = controller.inserisciVincolo(vincolo);
             if (successo) {
                 JOptionPane.showMessageDialog(this, "Vincolo aggiunto correttamente.");
             } else {
