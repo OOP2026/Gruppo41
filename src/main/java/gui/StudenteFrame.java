@@ -14,9 +14,6 @@ public class StudenteFrame extends JPanel {
     private final DefaultTableModel tableModel;
 
     public StudenteFrame(Studente studente, Controller controller) {
-        setTitle("Dashboard Studente");
-        setSize(700, 500);
-        setLocationRelativeTo(null);
 
         setLayout(new BorderLayout());
 
@@ -51,7 +48,7 @@ public class StudenteFrame extends JPanel {
         List<Lezione> lezioni = controller.getLezioniPerAnno(studente.getAnnoCorso());
 
         if (lezioni == null || lezioni.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Nessuna lezione trovata per il tuo anno di corso.");
+            JOptionPane.showMessageDialog(this, "Nessuna lezione trouvata per il tuo anno di corso.");
             return;
         }
 
