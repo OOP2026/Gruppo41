@@ -5,30 +5,24 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnessioneDatabase {
-    
-    private static ConnessioneDatabase instance;
-    private Connection connection;
-    
-    private final String url = "jdbc:postgresql://localhost:5432/nome_tuo_db";
-    private final String user = "postgres";
-    private final String password = "la_tua_password_di_postgres";
 
-    private ConnessioneDatabase() {
-        try {
-            Class.forName("org.postgresql.Driver");
-            this.connection = DriverManager.getConnection(url, user, password);
-            System.out.println("Connessione al database stabilita con successo!");
-        } catch (ClassNotFoundException e) {
-            System.err.println("Driver PostgreSQL non trovato!");
-            e.printStackTrace();
-        } catch (SQLException e) {
-            System.err.println("Errore durante la connessione al database!");
-            e.printStackTrace();
+    private static ConnessioneDatabase instance;
+    private final Connection connection;
+    private ConnessioneDatabase() throws SQLException {
+        String url = System.getenv("DB_URL");
+        String user = System.getenv("DB_USER");
+        String password = System.getenv("DB_PASSWORD");
+
+        if (url == null || user == null || password == null) {
+            throw new IllegalStateException(
+                "Variabili d'ambiente DB_URL, DB_USER, DB_PASSWORD non impostate.");
         }
+
+        this.connection = DriverManager.getConnection(url, user, password);
     }
 
-    public static ConnessioneDatabase getInstance() throws SQLException {
-        if (instance == null || instance.getConnection().isClosed()) {
+    public static synchronized ConnessioneDatabase getInstance() throws SQLException {
+        if (instance == null || instance.connection.isClosed()) {
             instance = new ConnessioneDatabase();
         }
         return instance;
