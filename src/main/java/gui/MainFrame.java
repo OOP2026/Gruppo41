@@ -27,8 +27,8 @@ public class MainFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        LoginPanel loginPanel = new LoginPanel(this, controller);
-        mainPanel.add(loginPanel, "LOGIN");
+        LoginFrame loginFrame = new LoginFrame(this, controller);
+        mainPanel.add(loginFrame, "LOGIN");
 
         add(mainPanel);
         cardLayout.show(mainPanel, "LOGIN");
@@ -39,16 +39,16 @@ public class MainFrame extends JFrame {
 
         if (utente instanceof Coordinatore) {
             cardName = "COORDINATORE";
-            mainPanel.add(new CoordinatorePanel((Coordinatore) utente, controller), cardName);
+            mainPanel.add(new CoordinatoreFrame((Coordinatore) utente, controller), cardName);
         } else if (utente instanceof ResponsabileOrario) {
             cardName = "RESPONSABILE";
-            mainPanel.add(new ResponsabileOrarioPanel((ResponsabileOrario) utente, controller), cardName);
+            mainPanel.add(new ResponsabileOrarioFrame((ResponsabileOrario) utente, controller), cardName);
         } else if (utente instanceof Docente) {
             cardName = "DOCENTE";
-            mainPanel.add(new DocentePanel((Docente) utente, controller), cardName);
+            mainPanel.add(new DocenteFrame((Docente) utente, controller), cardName);
         } else if (utente instanceof Studente) {
             cardName = "STUDENTE";
-            mainPanel.add(new StudentePanel((Studente) utente, controller), cardName);
+            mainPanel.add(new StudenteFrame((Studente) utente, controller), cardName);
         } else {
             cardName = "LOGIN";
         }
