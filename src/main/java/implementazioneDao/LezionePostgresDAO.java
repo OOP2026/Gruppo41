@@ -2,35 +2,62 @@ package implementazioneDao;
 
 import dao.LezioneDAO;
 import database_connection.ConnessioneDatabase;
-import model.*;
-import java.sql.*;
-import java.time.LocalTime;
+import model.Aula;
+import model.Docente;
+import model.Insegnamento;
+import model.Lezione;
+import model.SpostamentoLezione;
+import model.Vincolo;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LezionePostgresDAO implements LezioneDAO {
-    private Connection connection;
+
+    private static final String SELECT_LEZIONE_BASE =
+            "SELECT l.giorno AS l_giorno, l.ora_inizio AS l_ora_inizio, l.ora_fine AS l_ora_fine, "
+                    + "l.aula_nome AS l_aula_nome, "
+                    + "i.nome AS i_nome, i.cfu AS i_cfu, i.anno_corso AS i_anno_corso, "
+                    + "u.nome AS u_nome, u.cognome AS u_cognome, u.email AS u_email, u.login AS u_login, u.password AS u_password "
+                    + "FROM lezione l "
+                    + "JOIN insegnamento i ON l.insegnamento_id = i.nome "
+                    + "JOIN utente u ON i.docente_login = u.login";
+
+    private final Connection connection;
 
     public LezionePostgresDAO() {
+        Connection conn;
         try {
-            this.connection = ConnessioneDatabase.getInstance().getConnection();
+            conn = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
             e.printStackTrace();
+            conn = null;
         }
+        this.connection = conn;
+    }
+
+    private Lezione mappaLezione(ResultSet rs) throws SQLException {
+        Docente docente = new Docente(rs.getString("u_nome"), rs.getString("u_cognome"),
+                rs.getString("u_email"), rs.getString("u_login"), rs.getString("u_password"));
+        Insegnamento insegnamento = new Insegnamento(rs.getString("i_nome"), rs.getInt("i_cfu"),
+                rs.getString("i_anno_corso"), docente);
+        Aula aula = new Aula(rs.getString("l_aula_nome"));
+        return new Lezione(insegnamento, rs.getString("l_giorno"),
+                rs.getTime("l_ora_inizio").toLocalTime(), rs.getTime("l_ora_fine").toLocalTime(), aula);
     }
 
     @Override
     public List<Lezione> getTutteLeLezioni() {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login";
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LEZIONE_BASE);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
-                Insegnamento ins = new Insegnamento(resultSet.getString("insegnamento_id"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d);
-                Aula aula = new Aula(resultSet.getString("aula_nome"));
-                Lezione lez = new Lezione(ins, resultSet.getString("giorno"), resultSet.getTime("ora_inizio").toLocalTime(), resultSet.getTime("ora_fine").toLocalTime(), aula);
-                lista.add(lez);
+                lista.add(mappaLezione(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -41,16 +68,12 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerAnno(String annoCorso) {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login WHERE i.anno_corso = ?";
+        String query = SELECT_LEZIONE_BASE + " WHERE i.anno_corso = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, annoCorso);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
-                    Insegnamento ins = new Insegnamento(resultSet.getString("insegnamento_id"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d);
-                    Aula aula = new Aula(resultSet.getString("aula_nome"));
-                    Lezione lez = new Lezione(ins, resultSet.getString("giorno"), resultSet.getTime("ora_inizio").toLocalTime(), resultSet.getTime("ora_fine").toLocalTime(), aula);
-                    lista.add(lez);
+                    lista.add(mappaLezione(resultSet));
                 }
             }
         } catch (SQLException e) {
@@ -62,16 +85,12 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerDocente(String loginDocente) {
         List<Lezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM lezione l JOIN insegnamento i ON l.insegnamento_id = i.nome JOIN utente u ON i.docente_login = u.login WHERE i.docente_login = ?";
+        String query = SELECT_LEZIONE_BASE + " WHERE i.docente_login = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, loginDocente);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
-                    Insegnamento ins = new Insegnamento(resultSet.getString("insegnamento_id"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d);
-                    Aula aula = new Aula(resultSet.getString("aula_nome"));
-                    Lezione lez = new Lezione(ins, resultSet.getString("giorno"), resultSet.getTime("ora_inizio").toLocalTime(), resultSet.getTime("ora_fine").toLocalTime(), aula);
-                    lista.add(lez);
+                    lista.add(mappaLezione(resultSet));
                 }
             }
         } catch (SQLException e) {
@@ -82,7 +101,8 @@ public class LezionePostgresDAO implements LezioneDAO {
 
     @Override
     public boolean inserisciLezione(Lezione lezione) {
-        String query = "INSERT INTO lezione (insegnamento_id, giorno, ora_inizio, ora_fine, aula_nome) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO lezione (insegnamento_id, giorno, ora_inizio, ora_fine, aula_nome) "
+                + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, lezione.getInsegnamento().getNome());
             statement.setString(2, lezione.getGiornoSettimana());
@@ -99,7 +119,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<Aula> getAuleDisponibili() {
         List<Aula> lista = new ArrayList<>();
-        String query = "SELECT * FROM aula";
+        String query = "SELECT nome FROM aula";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
@@ -112,19 +132,50 @@ public class LezionePostgresDAO implements LezioneDAO {
     }
 
     @Override
+    public boolean inserisciAula(Aula aula) {
+        String query = "INSERT INTO aula (nome) VALUES (?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, aula.getNome());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
     public List<Insegnamento> getInsegnamentiAttivi() {
         List<Insegnamento> lista = new ArrayList<>();
-        String query = "SELECT * FROM insegnamento i JOIN utente u ON i.docente_login = u.login";
+        String query = "SELECT i.nome AS i_nome, i.cfu AS i_cfu, i.anno_corso AS i_anno_corso, "
+                + "u.nome AS u_nome, u.cognome AS u_cognome, u.email AS u_email, u.login AS u_login, u.password AS u_password "
+                + "FROM insegnamento i JOIN utente u ON i.docente_login = u.login";
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
-                lista.add(new Insegnamento(resultSet.getString("nome"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d));
+                Docente docente = new Docente(resultSet.getString("u_nome"), resultSet.getString("u_cognome"),
+                        resultSet.getString("u_email"), resultSet.getString("u_login"), resultSet.getString("u_password"));
+                lista.add(new Insegnamento(resultSet.getString("i_nome"), resultSet.getInt("i_cfu"),
+                        resultSet.getString("i_anno_corso"), docente));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return lista;
+    }
+
+    @Override
+    public boolean inserisciInsegnamento(Insegnamento insegnamento) {
+        String query = "INSERT INTO insegnamento (nome, cfu, anno_corso, docente_login) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, insegnamento.getNome());
+            statement.setInt(2, insegnamento.getCfu());
+            statement.setString(3, insegnamento.getAnnoCorso());
+            statement.setString(4, insegnamento.getDocente().getLogin());
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -144,7 +195,8 @@ public class LezionePostgresDAO implements LezioneDAO {
 
     @Override
     public boolean richiediSpostamento(SpostamentoLezione spostamento) {
-        String query = "INSERT INTO spostamento (insegnamento_id, giorno_corrente, nuovo_giorno, nuova_ora_inizio, nuova_ora_fine, stato) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO spostamento (insegnamento_id, giorno_corrente, nuovo_giorno, "
+                + "nuova_ora_inizio, nuova_ora_fine, stato) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, spostamento.getLezione().getInsegnamento().getNome());
             statement.setString(2, spostamento.getLezione().getGiornoSettimana());
@@ -162,25 +214,22 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<SpostamentoLezione> getRichiesteSpostamento() {
         List<SpostamentoLezione> lista = new ArrayList<>();
-        String query = "SELECT * FROM spostamento s " +
-                       "JOIN insegnamento i ON s.insegnamento_id = i.nome " +
-                       "JOIN utente u ON i.docente_login = u.login " +
-                       "JOIN lezione l ON l.insegnamento_id = i.nome AND l.giorno = s.giorno_corrente";
+        String query = SELECT_LEZIONE_BASE.replace("l.giorno AS l_giorno", "s.giorno_corrente AS l_giorno")
+                + ", s.nuovo_giorno AS s_nuovo_giorno, s.nuova_ora_inizio AS s_nuova_ora_inizio, "
+                + "s.nuova_ora_fine AS s_nuova_ora_fine, s.stato AS s_stato "
+                + " JOIN spostamento s ON s.insegnamento_id = i.nome AND s.giorno_corrente = l.giorno";
+
         try (PreparedStatement statement = connection.prepareStatement(query);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
-                Docente d = new Docente(resultSet.getString("nome"), resultSet.getString("cognome"), resultSet.getString("email"), resultSet.getString("login"), "");
-                Insegnamento ins = new Insegnamento(resultSet.getString("insegnamento_id"), resultSet.getInt("cfu"), resultSet.getString("anno_corso"), d);
-                Aula aula = new Aula(resultSet.getString("aula_nome"));
-                Lezione lez = new Lezione(ins, resultSet.getString("giorno_corrente"), resultSet.getTime("ora_inizio").toLocalTime(), resultSet.getTime("ora_fine").toLocalTime(), aula);
-                
+                Lezione lezione = mappaLezione(resultSet);
                 SpostamentoLezione spostamento = new SpostamentoLezione(
-                    lez,
-                    resultSet.getString("nuovo_giorno"),
-                    resultSet.getTime("nuova_ora_inizio").toLocalTime(),
-                    resultSet.getTime("nuova_ora_fine").toLocalTime()
+                        lezione,
+                        resultSet.getString("s_nuovo_giorno"),
+                        resultSet.getTime("s_nuova_ora_inizio").toLocalTime(),
+                        resultSet.getTime("s_nuova_ora_fine").toLocalTime()
                 );
-                spostamento.setStato(resultSet.getString("stato"));
+                spostamento.setStato(resultSet.getString("s_stato"));
                 lista.add(spostamento);
             }
         } catch (SQLException e) {
