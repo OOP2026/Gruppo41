@@ -1,9 +1,13 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Docente extends Utente {
+
+    private static final int MAX_VINCOLI = 3;
+
     private List<Insegnamento> insegnamenti;
     private List<Vincolo> vincoli;
 
@@ -13,16 +17,36 @@ public class Docente extends Utente {
         this.vincoli = new ArrayList<>();
     }
 
-    public List<Insegnamento> getInsegnamenti() { return insegnamenti; }
-    public void setInsegnamenti(List<Insegnamento> insegnamenti) { this.insegnamenti = insegnamenti; }
-    public List<Vincolo> getVincoli() { return vincoli; }
-    public void setVincoli(List<Vincolo> vincoli) { this.vincoli = vincoli; }
+    // Restituisce una copia non modificabile: evita che l'esterno alteri
+    // la lista interna senza passare dai metodi della classe.
+    public List<Insegnamento> getInsegnamenti() {
+        return Collections.unmodifiableList(insegnamenti);
+    }
 
-    public boolean aggiungiVincolo(Vincolo v) {
-        if (this.vincoli.size() >= 3) {
+    public void setInsegnamenti(List<Insegnamento> insegnamenti) {
+        this.insegnamenti = new ArrayList<>(insegnamenti);
+    }
+
+    public void aggiungiInsegnamento(Insegnamento insegnamento) {
+        insegnamenti.add(insegnamento);
+    }
+
+    public List<Vincolo> getVincoli() {
+        return Collections.unmodifiableList(vincoli);
+    }
+
+    public void setVincoli(List<Vincolo> vincoli) {
+        this.vincoli = new ArrayList<>(vincoli);
+    }
+
+    // La traccia impone: "Ogni docente può indicare al massimo tre vincoli".
+    // Ritorna false se il limite è già stato raggiunto, cosi la GUI/Controller
+    // puo' avvisare l'utente invece di aggiungere il vincolo silenziosamente.
+    public boolean aggiungiVincolo(Vincolo vincolo) {
+        if (vincoli.size() >= MAX_VINCOLI) {
             return false;
         }
-        this.vincoli.add(v);
+        vincoli.add(vincolo);
         return true;
     }
 }
