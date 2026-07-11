@@ -9,7 +9,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class StudenteFrame extends JFrame {
+public class StudenteFrame extends JPanel {
 
     private final DefaultTableModel tableModel;
 
