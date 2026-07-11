@@ -13,7 +13,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
-public class DocenteFrame extends JFrame {
+public class DocenteFrame extends JPanel {
 
     private final DefaultTableModel tableModel;
     private final Docente docente;
