@@ -1,20 +1,26 @@
 package controller;
 
-import dao.UtenteDAO;
 import dao.LezioneDAO;
-import implementazioneDao.UtentePostgresDAO;
+import dao.UtenteDAO;
 import implementazioneDao.LezionePostgresDAO;
-import model.*;
+import implementazioneDao.UtentePostgresDAO;
+import model.Aula;
+import model.Docente;
+import model.Insegnamento;
+import model.Lezione;
+import model.SpostamentoLezione;
+import model.Utente;
+import model.Vincolo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Controller {
     private List<Lezione> lezioni;
-    private UtenteDAO utenteDao;
-    private LezioneDAO lezioneDao;
+    private final UtenteDAO utenteDao;
+    private final LezioneDAO lezioneDao;
     private Utente utenteLoggato;
-    private AppLauncher launcher; // Callback per avviare la GUI in modo disaccoppiato
+    private AppLauncher launcher;
 
     public Controller() {
         this.utenteDao = new UtentePostgresDAO();
@@ -70,8 +76,16 @@ public class Controller {
         return lezioneDao.getAuleDisponibili();
     }
 
+    public boolean inserisciAula(Aula aula) {
+        return lezioneDao.inserisciAula(aula);
+    }
+
     public List<Insegnamento> getInsegnamentiAttivi() {
         return lezioneDao.getInsegnamentiAttivi();
+    }
+
+    public boolean inserisciInsegnamento(Insegnamento insegnamento) {
+        return lezioneDao.inserisciInsegnamento(insegnamento);
     }
 
     public boolean aggiungiLezione(Lezione lezione) {
@@ -85,13 +99,15 @@ public class Controller {
         List<Lezione> esistenti = getLezioni();
         for (Lezione l : esistenti) {
             if (l.getGiornoSettimana().equalsIgnoreCase(nuova.getGiornoSettimana())) {
-                boolean sovrapposizioneOraria = nuova.getOraInizio().isBefore(l.getOraFine()) && nuova.getOraFine().isAfter(l.getOraInizio());
+                boolean sovrapposizioneOraria = nuova.getOraInizio().isBefore(l.getOraFine())
+                        && nuova.getOraFine().isAfter(l.getOraInizio());
                 if (sovrapposizioneOraria) {
                     if (l.getAula().getNome().equalsIgnoreCase(nuova.getAula().getNome())) {
-                        return false; 
+                        return false;
                     }
-                    if (l.getInsegnamento().getDocente().getLogin().equalsIgnoreCase(nuova.getInsegnamento().getDocente().getLogin())) {
-                        return false; 
+                    if (l.getInsegnamento().getDocente().getLogin()
+                            .equalsIgnoreCase(nuova.getInsegnamento().getDocente().getLogin())) {
+                        return false;
                     }
                 }
             }
@@ -100,7 +116,20 @@ public class Controller {
     }
 
     private boolean verificaVincoliDocente(Lezione nuova) {
-        return true; 
+        Docente docente = nuova.getInsegnamento().getDocente();
+        if (docente == null) {
+            return true;
+        }
+        for (Vincolo v : docente.getVincoli()) {
+            if (v.getGiorno().equalsIgnoreCase(nuova.getGiornoSettimana())) {
+                boolean sovrapposizione = nuova.getOraInizio().isBefore(v.getOraFine())
+                        && nuova.getOraFine().isAfter(v.getOraInizio());
+                if (sovrapposizione) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public boolean inserisciVincolo(Vincolo v) {
