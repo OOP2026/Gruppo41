@@ -2,57 +2,90 @@ package implementazioneDao;
 
 import dao.UtenteDAO;
 import database_connection.ConnessioneDatabase;
-import model.Utente;
-import model.Studente;
+import model.Coordinatore;
 import model.Docente;
-import java.sql.*;
+import model.ResponsabileOrario;
+import model.Studente;
+import model.Utente;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UtentePostgresDAO implements UtenteDAO {
-    private Connection connection;
+
+    private final Connection connection;
 
     public UtentePostgresDAO() {
         try {
             this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Impossibile connettersi al database", e);
         }
     }
 
     @Override
     public Utente login(String login, String password) {
         String query = "SELECT * FROM utente WHERE login = ? AND password = ?";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, login);
-            statement.setString(2, password);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    String tipo = resultSet.getString("tipo");
-                    String nome = resultSet.getString("nome");
-                    String cognome = resultSet.getString("cognome");
-                    String email = resultSet.getString("email");
-                    if ("STUDENTE".equals(tipo)) {
-                        return new Studente(nome, cognome, email, login, password, resultSet.getString("matricola"));
-                    } else if ("DOCENTE".equals(tipo)) {
-                        return new Docente(nome, cognome, email, login, password);
-                    }
+            statement.setString(2, hashPassword(password));
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
                 }
+                return mappaUtente(rs, login);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
+    }
+
+    // La tabella 'utente' deve avere una colonna 'tipo' (es. STUDENTE,
+    // DOCENTE, RESPONSABILE, COORDINATORE) per distinguere quale sottoclasse
+    // istanziare: e' cosi' che si ottiene il polimorfismo anche leggendo dal DB.
+    private Utente mappaUtente(ResultSet rs, String login) throws SQLException {
+        String tipo = rs.getString("tipo");
+        String nome = rs.getString("nome");
+        String cognome = rs.getString("cognome");
+        String email = rs.getString("email");
+        String passwordHash = rs.getString("password");
+
+        switch (tipo) {
+            case "STUDENTE":
+                return new Studente(nome, cognome, email, login, passwordHash,
+                        rs.getString("matricola"), rs.getString("anno_corso"));
+            case "DOCENTE":
+                return new Docente(nome, cognome, email, login, passwordHash);
+            case "RESPONSABILE":
+                return new ResponsabileOrario(nome, cognome, email, login, passwordHash);
+            case "COORDINATORE":
+                return new Coordinatore(nome, cognome, email, login, passwordHash);
+            default:
+                return null;
+        }
     }
 
     @Override
     public boolean registraStudente(Studente studente) {
-        String query = "INSERT INTO utente (nome, cognome, email, login, password, matricola, tipo) VALUES (?, ?, ?, ?, ?, ?, 'STUDENTE')";
+        String query = "INSERT INTO utente (nome, cognome, email, login, password, tipo, matricola, anno_corso) "
+                + "VALUES (?, ?, ?, ?, ?, 'STUDENTE', ?, ?)";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, studente.getNome());
             statement.setString(2, studente.getCognome());
             statement.setString(3, studente.getEmail());
             statement.setString(4, studente.getLogin());
-            statement.setString(5, studente.getPassword());
+            statement.setString(5, hashPassword(studente.getPassword()));
             statement.setString(6, studente.getMatricola());
+            statement.setString(7, studente.getAnnoCorso());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,17 +95,37 @@ public class UtentePostgresDAO implements UtenteDAO {
 
     @Override
     public boolean registraDocente(Docente docente) {
-        String query = "INSERT INTO utente (nome, cognome, email, login, password, tipo) VALUES (?, ?, ?, ?, ?, 'DOCENTE')";
+        String query = "INSERT INTO utente (nome, cognome, email, login, password, tipo) "
+                + "VALUES (?, ?, ?, ?, ?, 'DOCENTE')";
+
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docente.getNome());
             statement.setString(2, docente.getCognome());
             statement.setString(3, docente.getEmail());
             statement.setString(4, docente.getLogin());
-            statement.setString(5, docente.getPassword());
+            statement.setString(5, hashPassword(docente.getPassword()));
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // Hashing minimo senza dipendenze esterne (SHA-256). Per un progetto
+    // reale sarebbe meglio BCrypt (libreria org.mindrot:jbcrypt, con salt
+    // automatico), ma richiede di aggiungere la dipendenza al pom.xml.
+    // L'importante e' che la password non sia MAI salvata o confrontata in chiaro.
+    private String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hash) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Algoritmo di hashing non disponibile", e);
         }
     }
 }
