@@ -23,10 +23,6 @@ public class DocenteFrame extends JPanel {
         this.docente = docente;
         this.controller = controller;
 
-        setTitle("Dashboard Docente");
-        setSize(800, 550);
-        setLocationRelativeTo(null);
-
         setLayout(new BorderLayout());
 
         JLabel header = new JLabel(
