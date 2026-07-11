@@ -1,74 +1,62 @@
 package gui;
 
 import controller.Controller;
-import model.Lezione;
+import model.Coordinatore;
+import model.Docente;
+import model.ResponsabileOrario;
+import model.Studente;
+import model.Utente;
+
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.List;
 
 public class MainFrame extends JFrame {
-    protected Controller controller;
-    protected JTable tabellaOrari;
-    protected DefaultTableModel tableModel;
+
+    private final CardLayout cardLayout;
+    private final JPanel mainPanel;
+    private final Controller controller;
 
     public MainFrame(Controller controller) {
-        this(controller, "Orario Accademico Ufficiale");
-    }
-
-    public MainFrame(Controller controller, String titolo) {
         this.controller = controller;
-        setTitle(titolo);
-        setSize(900, 600);
+
+        setTitle("Sistema Gestione Orari Universita'");
+        setSize(900, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel();
-        topPanel.setBackground(new Color(41, 128, 185));
-        JLabel lblTitle = new JLabel(titolo);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTitle.setForeground(Color.WHITE);
-        topPanel.add(lblTitle);
-        add(topPanel, BorderLayout.NORTH);
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
 
-        String[] colonne = {"Insegnamento", "Docente", "Giorno", "Ora Inizio", "Ora Fine", "Aula"};
-        tableModel = new DefaultTableModel(colonne, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        tabellaOrari = new JTable(tableModel);
-        add(new JScrollPane(tabellaOrari), BorderLayout.CENTER);
+        LoginPanel loginPanel = new LoginPanel(this, controller);
+        mainPanel.add(loginPanel, "LOGIN");
 
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnLogout = new JButton("Logout");
-        btnLogout.addActionListener(e -> {
-            controller.logout();
-            this.dispose();
-            controller.avviaApplicazione();
-        });
-        bottomPanel.add(btnLogout);
-        add(bottomPanel, BorderLayout.SOUTH);
-
-        aggiornaTabellaOrari(controller.getLezioni());
+        add(mainPanel);
+        cardLayout.show(mainPanel, "LOGIN");
     }
 
-    protected void aggiornaTabellaOrari(List<Lezione> lista) {
-        tableModel.setRowCount(0);
-        if (lista != null) {
-            for (Lezione l : lista) {
-                Object[] riga = {
-                    l.getInsegnamento().getNome(),
-                    l.getInsegnamento().getDocente().getCognome() + " " + l.getInsegnamento().getDocente().getNome(),
-                    l.getGiornoSettimana(),
-                    l.getOraInizio().toString(),
-                    l.getOraFine().toString(),
-                    l.getAula().getNome()
-                };
-                tableModel.addRow(riga);
-            }
+    public void cambiaSchermata(Utente utente) {
+        String cardName;
+
+        if (utente instanceof Coordinatore) {
+            cardName = "COORDINATORE";
+            mainPanel.add(new CoordinatorePanel((Coordinatore) utente, controller), cardName);
+        } else if (utente instanceof ResponsabileOrario) {
+            cardName = "RESPONSABILE";
+            mainPanel.add(new ResponsabileOrarioPanel((ResponsabileOrario) utente, controller), cardName);
+        } else if (utente instanceof Docente) {
+            cardName = "DOCENTE";
+            mainPanel.add(new DocentePanel((Docente) utente, controller), cardName);
+        } else if (utente instanceof Studente) {
+            cardName = "STUDENTE";
+            mainPanel.add(new StudentePanel((Studente) utente, controller), cardName);
+        } else {
+            cardName = "LOGIN";
         }
+
+        cardLayout.show(mainPanel, cardName);
+    }
+
+    public void mostraLogin() {
+        cardLayout.show(mainPanel, "LOGIN");
     }
 }
