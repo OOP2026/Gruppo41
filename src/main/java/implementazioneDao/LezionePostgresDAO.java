@@ -31,14 +31,11 @@ public class LezionePostgresDAO implements LezioneDAO {
     private final Connection connection;
 
     public LezionePostgresDAO() {
-        Connection conn;
         try {
-            conn = ConnessioneDatabase.getInstance().getConnection();
+            this.connection = ConnessioneDatabase.getInstance().getConnection();
         } catch (SQLException e) {
-            e.printStackTrace();
-            conn = null;
+            throw new RuntimeException("Errore durante l'inizializzazione della connessione al database", e);
         }
-        this.connection = conn;
     }
 
     private Lezione mappaLezione(ResultSet rs) throws SQLException {
@@ -60,7 +57,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                 lista.add(mappaLezione(resultSet));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero di tutte le lezioni", e);
         }
         return lista;
     }
@@ -77,7 +74,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero delle lezioni per anno corso", e);
         }
         return lista;
     }
@@ -94,7 +91,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero delle lezioni del docente", e);
         }
         return lista;
     }
@@ -111,8 +108,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setString(5, lezione.getAula().getNome());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante l'inserimento della lezione", e);
         }
     }
 
@@ -126,7 +122,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                 lista.add(new Aula(resultSet.getString("nome")));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero delle aule disponibili", e);
         }
         return lista;
     }
@@ -138,8 +134,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setString(1, aula.getNome());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante l'inserimento dell'aula", e);
         }
     }
 
@@ -158,7 +153,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                         resultSet.getString("i_anno_corso"), docente));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero degli insegnamenti attivi", e);
         }
         return lista;
     }
@@ -173,8 +168,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setString(4, insegnamento.getDocente().getLogin());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante l'inserimento dell'insegnamento", e);
         }
     }
 
@@ -188,8 +182,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setTime(4, Time.valueOf(vincolo.getOraFine()));
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante l'inserimento del vincolo", e);
         }
     }
 
@@ -206,8 +199,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setString(6, spostamento.getStato());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante la richiesta di spostamento", e);
         }
     }
 
@@ -233,7 +225,7 @@ public class LezionePostgresDAO implements LezioneDAO {
                 lista.add(spostamento);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Errore durante il recupero delle richieste di spostamento", e);
         }
         return lista;
     }
@@ -247,8 +239,7 @@ public class LezionePostgresDAO implements LezioneDAO {
             statement.setString(3, spostamento.getLezione().getGiornoSettimana());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante l'aggiornamento dello stato di spostamento", e);
         }
     }
 }
