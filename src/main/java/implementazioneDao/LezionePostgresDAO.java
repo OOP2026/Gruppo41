@@ -63,7 +63,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     }
 
     @Override
-    public List<Lezione> getTutteLe Lezioni() {
+    public List<Lezione> getTutteLeLezioni() {
         List<Lezione> lista = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_LEZIONE_BASE);
              ResultSet resultSet = statement.executeQuery()) {
