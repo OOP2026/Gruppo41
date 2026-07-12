@@ -28,6 +28,20 @@ public class LezionePostgresDAO implements LezioneDAO {
                     + "JOIN insegnamento i ON l.insegnamento_id = i.nome "
                     + "JOIN utente u ON i.docente_login = u.login";
 
+    private static final String SELECT_LEZIONE_BY_ANNO = SELECT_LEZIONE_BASE + " WHERE i.anno_corso = ?";
+    private static final String SELECT_LEZIONE_BY_DOCENTE = SELECT_LEZIONE_BASE + " WHERE i.docente_login = ?";
+
+    private static final String SELECT_SPOSTAMENTI =
+            "SELECT s.giorno_corrente AS l_giorno, l.ora_inizio AS l_ora_inizio, l.ora_fine AS l_ora_fine, "
+                    + "l.aula_nome AS l_aula_nome, i.nome AS i_nome, i.cfu AS i_cfu, i.anno_corso AS i_anno_corso, "
+                    + "u.nome AS u_nome, u.cognome AS u_cognome, u.email AS u_email, u.login AS u_login, u.password AS u_password, "
+                    + "s.nuovo_giorno AS s_nuovo_giorno, s.nuova_ora_inizio AS s_nuova_ora_inizio, "
+                    + "s.nuova_ora_fine AS s_nuova_ora_fine, s.stato AS s_stato "
+                    + "FROM lezione l "
+                    + "JOIN insegnamento i ON l.insegnamento_id = i.nome "
+                    + "JOIN utente u ON i.docente_login = u.login "
+                    + "JOIN spostamento s ON s.insegnamento_id = i.nome AND s.giorno_corrente = l.giorno";
+
     private final Connection connection;
 
     public LezionePostgresDAO() {
@@ -49,7 +63,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     }
 
     @Override
-    public List<Lezione> getTutteLeLezioni() {
+    public List<Lezione> getTutteLe Lezioni() {
         List<Lezione> lista = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_LEZIONE_BASE);
              ResultSet resultSet = statement.executeQuery()) {
@@ -65,8 +79,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerAnno(String annoCorso) {
         List<Lezione> lista = new ArrayList<>();
-        String query = SELECT_LEZIONE_BASE + " WHERE i.anno_corso = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LEZIONE_BY_ANNO)) {
             statement.setString(1, annoCorso);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -82,8 +95,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<Lezione> getLezioniPerDocente(String loginDocente) {
         List<Lezione> lista = new ArrayList<>();
-        String query = SELECT_LEZIONE_BASE + " WHERE i.docente_login = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LEZIONE_BY_DOCENTE)) {
             statement.setString(1, loginDocente);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -206,12 +218,7 @@ public class LezionePostgresDAO implements LezioneDAO {
     @Override
     public List<SpostamentoLezione> getRichiesteSpostamento() {
         List<SpostamentoLezione> lista = new ArrayList<>();
-        String query = SELECT_LEZIONE_BASE.replace("l.giorno AS l_giorno", "s.giorno_corrente AS l_giorno")
-                + ", s.nuovo_giorno AS s_nuovo_giorno, s.nuova_ora_inizio AS s_nuova_ora_inizio, "
-                + "s.nuova_ora_fine AS s_nuova_ora_fine, s.stato AS s_stato "
-                + " JOIN spostamento s ON s.insegnamento_id = i.nome AND s.giorno_corrente = l.giorno";
-
-        try (PreparedStatement statement = connection.prepareStatement(query);
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_SPOSTAMENTI);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 Lezione lezione = mappaLezione(resultSet);
