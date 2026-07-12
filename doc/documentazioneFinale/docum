@@ -6,7 +6,6 @@ Questo documento contiene la specifica tecnica di dettaglio di tutte le componen
 
 Questo diagramma rappresenta la struttura tecnica reale delle classi implementate nel progetto, suddivise per i relativi package secondo lo standard architetturale MVC + DAO.
 
-(Nota per la visualizzazione: GitHub renderizzerà automaticamente questo diagramma UML)
 
 classDiagram
     %% Package Model
