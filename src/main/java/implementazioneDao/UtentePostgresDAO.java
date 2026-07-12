@@ -43,14 +43,10 @@ public class UtentePostgresDAO implements UtenteDAO {
                 return mappaUtente(rs, login);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Errore durante il login dell'utente", e);
         }
     }
 
-    // La tabella 'utente' deve avere una colonna 'tipo' (es. STUDENTE,
-    // DOCENTE, RESPONSABILE, COORDINATORE) per distinguere quale sottoclasse
-    // istanziare: e' cosi' che si ottiene il polimorfismo anche leggendo dal DB.
     private Utente mappaUtente(ResultSet rs, String login) throws SQLException {
         String tipo = rs.getString("tipo");
         String nome = rs.getString("nome");
@@ -88,8 +84,7 @@ public class UtentePostgresDAO implements UtenteDAO {
             statement.setString(7, studente.getAnnoCorso());
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante la registrazione dello studente", e);
         }
     }
 
@@ -106,15 +101,10 @@ public class UtentePostgresDAO implements UtenteDAO {
             statement.setString(5, hashPassword(docente.getPassword()));
             return statement.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            throw new RuntimeException("Errore durante la registrazione del docente", e);
         }
     }
 
-    // Hashing minimo senza dipendenze esterne (SHA-256). Per un progetto
-    // reale sarebbe meglio BCrypt (libreria org.mindrot:jbcrypt, con salt
-    // automatico), ma richiede di aggiungere la dipendenza al pom.xml.
-    // L'importante e' che la password non sia MAI salvata o confrontata in chiaro.
     private String hashPassword(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
