@@ -1,0 +1,167 @@
+ Documentazione Finale di Progetto: Sistema Gestione Orari
+
+Questo documento contiene la specifica tecnica di dettaglio di tutte le componenti implementate, i diagrammi di sequenza per i casi d'uso principali e un breve manuale utente per l'esecuzione del sistema.
+
+1. Class Diagram di Dettaglio
+
+Questo diagramma rappresenta la struttura tecnica reale delle classi implementate nel progetto, suddivise per i relativi package secondo lo standard architetturale MVC + DAO.
+
+(Nota per la visualizzazione: GitHub renderizzerà automaticamente questo diagramma UML)
+
+classDiagram
+    %% Package Model
+    namespace Model {
+        class Utente
+        class Docente
+        class Studente
+        class Lezione {
+            -Insegnamento insegnamento
+            -String giornoSettimana
+            -LocalTime oraInizio
+            -LocalTime oraFine
+            -Aula aula
+        }
+        class Insegnamento
+        class Aula
+        class Vincolo
+    }
+
+    Docente --|> Utente
+    Studente --|> Utente
+
+    %% Package DAO
+    namespace DAO {
+        class UtenteDAO {
+            <<interface>>
+            +login(username, password) Utente
+        }
+        class LezioneDAO {
+            <<interface>>
+            +getTutteLeLezioni() List~Lezione~
+            +inserisciLezione(Lezione) boolean
+        }
+        class UtentePostgresDAO
+        class LezionePostgresDAO
+    }
+    
+    UtentePostgresDAO ..|> UtenteDAO
+    LezionePostgresDAO ..|> LezioneDAO
+
+    %% Package Controller
+    namespace Controller {
+        class Controller {
+            -Utente utenteLoggato
+            -List~Lezione~ lezioni
+            +login(user, pass) boolean
+            +getLezioni() List~Lezione~
+            +aggiungiLezione(Lezione) boolean
+        }
+        class AppLauncher {
+            <<interface>>
+            +launch()
+        }
+    }
+
+    Controller --> UtenteDAO : usa
+    Controller --> LezioneDAO : usa
+    Controller --> AppLauncher : callback
+
+    %% Package GUI
+    namespace GUI {
+        class LoginFrame
+        class DocenteFrame
+        class StudenteFrame
+    }
+
+    LoginFrame --> Controller : invia azioni
+    DocenteFrame --> Controller : richiede dati
+    StudenteFrame --> Controller : richiede dati
+
+
+2. Sequence Diagrams (Diagrammi di Sequenza)
+
+Di seguito sono riportati i diagrammi di sequenza relativi a due delle funzionalità principali del sistema.
+
+Caso d'Uso 1: Autenticazione Utente (Login)
+
+Descrive il flusso di interazione da quando l'utente inserisce le credenziali fino all'apertura della schermata dedicata al suo ruolo.
+
+sequenceDiagram
+    actor Utente
+    participant GUI as LoginFrame
+    participant C as Controller
+    participant DAO as UtentePostgresDAO
+    participant DB as Database PostgreSQL
+
+    Utente->>GUI: Inserisce username e password
+    Utente->>GUI: Clicca "Accedi"
+    GUI->>C: login(username, password)
+    C->>DAO: login(username, password)
+    DAO->>DB: Esegue query SELECT
+    DB-->>DAO: Ritorna record utente (o null)
+    DAO-->>C: Istanza di Utente (es. Docente)
+    
+    alt Credenziali Corrette
+        C-->>GUI: return true
+        GUI->>GUI: dispose()
+        GUI->>DocenteFrame: new DocenteFrame(controller)
+        DocenteFrame-->>Utente: Mostra Dashboard Docente
+    else Credenziali Errate
+        C-->>GUI: return false
+        GUI-->>Utente: Mostra "Errore di Accesso"
+    end
+
+
+Caso d'Uso 2: Visualizzazione Orario Lezioni
+
+Descrive il flusso in cui uno studente (o docente) richiede di visualizzare le lezioni salvate nel sistema.
+
+sequenceDiagram
+    actor Studente
+    participant GUI as StudenteFrame
+    participant C as Controller
+    participant DAO as LezionePostgresDAO
+    participant DB as Database PostgreSQL
+
+    Studente->>GUI: Apre la sezione "Orario"
+    GUI->>C: getLezioni()
+    C->>DAO: getTutteLeLezioni()
+    DAO->>DB: Esegue query SELECT su lezioni e aule
+    DB-->>DAO: Ritorna i dati
+    DAO-->>C: List<Lezione>
+    C-->>GUI: List<Lezione>
+    GUI->>GUI: Popola la JTable
+    GUI-->>Studente: Mostra orario grafico
+
+
+3. Manuale d'Uso dell'Applicazione
+
+Il Sistema Gestione Orari è un'applicazione desktop Java basata su interfaccia grafica (Swing) e connessa a un database relazionale PostgreSQL.
+
+🛠️ Prerequisiti per l'avvio
+
+Java JDK: Versione 17 o superiore.
+
+Database: PostgreSQL in esecuzione con lo schema aggiornato (verificare i parametri di connessione nel pacchetto database_connection).
+
+Maven: Per la gestione delle dipendenze (es. driver JDBC).
+
+🚀 Avvio dell'Applicazione
+
+Per avviare l'applicazione, eseguire la classe principale Main.java situata nella root del progetto (src/main/java/Main.java).
+All'avvio verrà mostrata la schermata di Login.
+
+👤 Profili Utente
+
+Il sistema gestisce dinamicamente i ruoli. A seconda delle credenziali inserite, si aprirà un'interfaccia differente:
+
+Studente: Può visualizzare l'orario delle lezioni globale o filtrato per anno di corso.
+
+Docente: Può visualizzare le proprie lezioni, inserire vincoli di disponibilità e richiedere lo spostamento di una lezione.
+
+Responsabile Orario / Coordinatore: Ha i permessi per inserire nuove lezioni nel sistema, gestire le aule e approvare le richieste di spostamento.
+
+4. Documentazione Precedente
+
+I documenti di specifica dei requisiti, i casi d'uso (Use Case Diagram) e le prime bozze architetturali prodotti negli step precedenti sono reperibili nelle omonime cartelle all'interno della directory doc/ del repository.
+L'attuale Class Diagram e l'architettura del codice sostituiscono e raffinano le versioni preliminari.
